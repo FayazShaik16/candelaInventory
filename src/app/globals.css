@@ -1,42 +1,51 @@
 @import "tailwindcss";
 
 :root {
-  --sidebar-bg: #173D30;
-  --sidebar-active: #28513F;
-  --sidebar-hover: #1E4637;
-  --sidebar-text: #E5EDE8;
-  --sidebar-muted: #8EA79B;
+  --sidebar-bg: #14352A;
+  --sidebar-active: #224C3B;
+  --sidebar-hover: #1B4133;
+  --sidebar-text: #F8FAF9;
+  --sidebar-muted: #B5CCC0;
   --sidebar-border: #1E4637;
 
-  --accent-primary: #247A51;
-  --accent-hover: #1D6342;
-  --accent-subtle: #EBF4EF;
+  --accent-primary: #1E6E45;
+  --accent-hover: #165636;
+  --accent-subtle: #E2ECE5;
 
-  --bg-main: #F5F7F5;
+  --bg-main: #F4F6F4;
   --bg-card: #FFFFFF;
-  --bg-subtle: #F9FAF9;
+  --bg-subtle: #F8FAF8;
 
-  --text-primary: #172A21;
-  --text-secondary: #64748B;
-  --text-muted: #94A3B8;
+  /* High-contrast, dark, razor-sharp typography */
+  --text-primary: #0B1310;
+  --text-secondary: #1E293B;
+  --text-muted: #475569;
 
-  --border-color: #E5EBE6;
-  --border-focus: #247A51;
+  --border-color: #D1D5DB;
+  --border-focus: #1E6E45;
 
-  --status-success: #16A34A;
-  --status-success-bg: #F0FDF4;
-  --status-warning: #D97706;
-  --status-warning-bg: #FFFBEB;
-  --status-danger: #DC2626;
-  --status-danger-bg: #FEF2F2;
+  --status-success: #15803D;
+  --status-success-bg: #DCFCE7;
+  --status-warning: #B45309;
+  --status-warning-bg: #FEF3C7;
+  --status-danger: #B91C1C;
+  --status-danger-bg: #FEE2E2;
+}
+
+html {
+  font-size: 15px; /* Increases global rem sizing smoothly by ~7% */
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
   background-color: var(--bg-main);
-  color: var(--text-primary);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: #0B1310;
+  font-family: var(--font-inter), 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-weight: 400;
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 /* Custom crisp scrollbar for enterprise data-dense layout */
@@ -50,12 +59,12 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #CBD5E1;
+  background: #94A3B8;
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94A3B8;
+  background: #64748B;
 }
 
 /* Dark sidebar scrollbar */
@@ -64,4 +73,81 @@ body {
 }
 .sidebar-scroll::-webkit-scrollbar-thumb:hover {
   background: #356750;
+}
+
+/* =========================================================================
+   HIGH-VISIBILITY TYPOGRAPHY & DARK CONTRAST SYSTEM OVERRIDES
+   ========================================================================= */
+
+/* Darken primary text to solid deep dark green-black */
+.text-\[\#172A21\] {
+  color: #0B1310 !important;
+  font-weight: 500;
+}
+
+/* Darken secondary text from washed out grey (#64748B) to dark slate (#1E293B) */
+.text-\[\#64748B\] {
+  color: #1E293B !important;
+}
+
+/* Darken muted grey (#94A3B8) to solid readable slate (#475569) */
+.text-\[\#94A3B8\] {
+  color: #475569 !important;
+}
+
+/* Placeholders - make crisp and legible */
+::placeholder,
+.placeholder\:text-\[\#94A3B8\]::placeholder {
+  color: #64748B !important;
+}
+
+/* Sidebar contrast boost: brighter, crisp sage/mint for dark green background */
+.text-\[\#8EA79B\] {
+  color: #C2D8CD !important;
+}
+
+.text-\[\#E5EDE8\] {
+  color: #F8FAF9 !important;
+}
+
+/* Boost micro font sizes for comfortable legibility */
+.text-\[10px\] {
+  font-size: 11.5px !important;
+  line-height: 1.3 !important;
+}
+
+.text-\[11px\] {
+  font-size: 12.5px !important;
+  line-height: 1.35 !important;
+}
+
+.text-xs {
+  font-size: 13.5px !important;
+  line-height: 1.4 !important;
+}
+
+.text-sm {
+  font-size: 14.5px !important;
+  line-height: 1.45 !important;
+}
+
+/* Table header contrast and visibility */
+thead th {
+  color: #0F172A !important;
+  font-weight: 700 !important;
+  font-size: 12.5px !important;
+  letter-spacing: 0.02em;
+}
+
+/* Table cells text clarity */
+tbody td {
+  color: #0F172A;
+  font-size: 13.5px !important;
+}
+
+/* Monospace tags and numbers */
+.font-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }

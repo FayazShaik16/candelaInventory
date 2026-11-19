@@ -54,12 +54,12 @@ export function ActivityList({ activities, onSelectUnit }: ActivityListProps) {
 
   return (
     <div className="bg-[#FFFFFF] border border-[#E5EBE6] rounded-lg">
-      <div className="px-4 py-3 border-b border-[#E5EBE6] flex items-center justify-between">
+      <div className="px-4 py-3 border-b border-[#CBD5E1] flex items-center justify-between">
         <div>
-          <h3 className="text-xs font-semibold text-[#172A21] tracking-tight">Recent Operations Log</h3>
-          <p className="text-[11px] text-[#64748B]">Real-time operational audit trail across laboratory bays</p>
+          <h3 className="text-sm font-bold text-[#0B1310] tracking-tight">Recent Operations Log</h3>
+          <p className="text-xs text-[#334155] font-medium mt-0.5">Real-time operational audit trail across laboratory bays</p>
         </div>
-        <span className="text-[10px] font-mono font-medium text-[#247A51] bg-[#EBF4EF] px-2 py-0.5 rounded border border-[#D5E9DE]">
+        <span className="text-xs font-mono font-semibold text-[#1E6E45] bg-[#E2ECE5] px-2.5 py-0.5 rounded border border-[#C2D6CC]">
           Live Stream
         </span>
       </div>
@@ -72,35 +72,35 @@ export function ActivityList({ activities, onSelectUnit }: ActivityListProps) {
               key={log.id}
               className="p-3.5 hover:bg-[#F9FAF9] transition-colors flex items-start gap-3"
             >
-              <div className="w-7 h-7 rounded-md bg-[#F5F7F5] border border-[#E5EBE6] flex items-center justify-center flex-shrink-0 mt-0.5">
+              <div className="w-8 h-8 rounded-md bg-[#F5F7F5] border border-[#CBD5E1] flex items-center justify-center flex-shrink-0 mt-0.5">
                 {getActionIcon(log.action)}
               </div>
 
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-xs font-medium text-[#172A21]">
+                  <span className="text-[13.5px] font-semibold text-[#0B1310]">
                     {log.title}
                   </span>
                   <span
-                    className={`text-[10px] px-1.5 py-0.2 rounded font-medium border ${badge.color}`}
+                    className={`text-xs px-2 py-0.5 rounded font-semibold border ${badge.color}`}
                   >
                     {badge.label}
                   </span>
                   <button
                     type="button"
                     onClick={() => onSelectUnit?.(log.unitAssetTag)}
-                    className="text-[11px] font-mono font-medium text-[#247A51] hover:underline flex items-center gap-0.5"
+                    className="text-xs font-mono font-bold text-[#1E6E45] hover:underline flex items-center gap-0.5"
                   >
                     <span>{log.unitAssetTag}</span>
-                    <ArrowRight className="w-2.5 h-2.5" />
+                    <ArrowRight className="w-3 h-3" />
                   </button>
                 </div>
 
-                <p className="text-[11px] text-[#64748B] mt-0.5 line-clamp-1">
+                <p className="text-xs text-[#334155] mt-1 line-clamp-1">
                   {log.description}
                 </p>
 
-                <div className="mt-1 flex items-center gap-3 text-[10px] text-[#94A3B8]">
+                <div className="mt-1 flex items-center gap-3 text-xs text-[#475569] font-medium">
                   <span>By {log.user.name} ({log.user.role})</span>
                   <span>•</span>
                   <span>{log.timestamp}</span>

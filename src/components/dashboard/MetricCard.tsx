@@ -50,19 +50,19 @@ export function MetricCard({
       } ${onClick ? 'cursor-pointer' : ''}`}
     >
       <div className="flex items-center justify-between gap-2">
-        <span className="text-xs font-medium text-[#64748B] truncate">{label}</span>
-        <div className="w-7 h-7 rounded-md bg-[#F5F7F5] border border-[#E5EBE6] flex items-center justify-center flex-shrink-0 text-[#247A51]">
-          <Icon className="w-3.5 h-3.5" />
+        <span className="text-sm font-semibold text-[#1E293B] truncate">{label}</span>
+        <div className="w-8 h-8 rounded-md bg-[#F5F7F5] border border-[#CBD5E1] flex items-center justify-center flex-shrink-0 text-[#1E6E45]">
+          <Icon className="w-4 h-4" />
         </div>
       </div>
 
-      <div className="mt-2 flex items-baseline justify-between gap-2">
-        <span className="text-2xl font-bold tracking-tight text-[#172A21]">
+      <div className="mt-2.5 flex items-baseline justify-between gap-2">
+        <span className="text-2xl font-extrabold tracking-tight text-[#0B1310]">
           {value}
         </span>
         {badge && (
           <span
-            className={`text-[11px] font-medium px-2 py-0.5 rounded-full border ${getBadgeClasses(
+            className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${getBadgeClasses(
               badge.variant
             )}`}
           >
@@ -72,7 +72,7 @@ export function MetricCard({
       </div>
 
       {subValue && (
-        <div className="mt-1 text-[11px] text-[#64748B] truncate">
+        <div className="mt-1 text-xs text-[#334155] font-medium truncate">
           {subValue}
         </div>
       )}

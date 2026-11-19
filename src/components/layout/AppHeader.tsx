@@ -132,10 +132,10 @@ export function AppHeader({
           <Menu className="w-5 h-5" />
         </button>
 
-        <div className="flex items-center gap-1.5 text-xs text-[#64748B]">
-          <span className="font-medium text-[#172A21] hidden sm:inline">Candela Operations</span>
-          <ChevronRight className="w-3.5 h-3.5 text-[#94A3B8] hidden sm:inline" />
-          <span className="font-semibold text-[#172A21] truncate">
+        <div className="flex items-center gap-2 text-sm text-[#1E293B]">
+          <span className="font-semibold text-[#0B1310] hidden sm:inline">Candela Operations</span>
+          <ChevronRight className="w-4 h-4 text-[#475569] hidden sm:inline" />
+          <span className="font-bold text-[#0B1310] truncate">
             {getBreadcrumbTitle()}
           </span>
         </div>
@@ -144,15 +144,15 @@ export function AppHeader({
       {/* Center: Global Search Bar */}
       <div className="flex-1 max-w-md mx-2 hidden md:block">
         <div className="relative">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94A3B8]" />
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#475569]" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Global search asset tag, serial, model, location..."
-            className="w-full h-8 pl-8 pr-12 text-xs bg-[#F5F7F5] hover:bg-[#F0F2F0] focus:bg-[#FFFFFF] border border-[#E5EBE6] focus:border-[#247A51] rounded-md text-[#172A21] placeholder:text-[#94A3B8] focus:outline-none transition-colors"
+            className="w-full h-9 pl-9 pr-12 text-sm bg-[#F5F7F5] hover:bg-[#F0F2F0] focus:bg-[#FFFFFF] border border-[#CBD5E1] focus:border-[#1E6E45] rounded-md text-[#0B1310] placeholder:text-[#64748B] focus:outline-none transition-colors"
           />
-          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-[#E5EBE6] text-[10px] font-mono text-[#64748B]">
+          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-[#E2E8F0] text-[11px] font-mono font-medium text-[#334155]">
             <span>Ctrl</span>
             <span>K</span>
           </div>

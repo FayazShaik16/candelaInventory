@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { 
   LayoutDashboard, 
   Radio, 
@@ -11,11 +11,9 @@ import {
   History, 
   Users, 
   Settings, 
-  ChevronDown, 
   PanelLeftClose, 
   PanelLeft, 
   CheckCircle2, 
-  Boxes,
   User
 } from 'lucide-react';
 import { UserProfileMenu } from './UserProfileMenu';
@@ -54,9 +52,6 @@ export function AppSidebar({
   const { role } = useAuth();
   const { metrics } = useInventory();
   const isAdmin = role === 'admin';
-
-  const [workspaceOpen, setWorkspaceOpen] = useState(false);
-  const [selectedWorkspace, setSelectedWorkspace] = useState('Inventory Operations');
 
   const mainNavItems = [
     {
@@ -186,50 +181,8 @@ export function AppSidebar({
           </button>
         </div>
 
-        {/* Workspace Selector */}
-        {!collapsed && (
-          <div className="px-3 pt-3 pb-2 flex-shrink-0">
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => setWorkspaceOpen(!workspaceOpen)}
-                className="w-full flex items-center justify-between px-2.5 py-1.5 rounded bg-[#1F4738]/50 hover:bg-[#1F4738] border border-[#28513F] text-left transition-colors"
-              >
-                <div className="flex items-center gap-2 min-w-0">
-                  <Boxes className="w-3.5 h-3.5 text-[#247A51] flex-shrink-0" />
-                  <span className="text-xs font-medium text-[#E5EDE8] truncate">
-                    {selectedWorkspace}
-                  </span>
-                </div>
-                <ChevronDown className={`w-3.5 h-3.5 text-[#8EA79B] transition-transform ${workspaceOpen ? 'rotate-180' : ''}`} />
-              </button>
-
-              {workspaceOpen && (
-                <div className="absolute top-full left-0 right-0 mt-1 z-30 bg-[#173D30] border border-[#28513F] rounded shadow-lg py-1 text-xs">
-                  {['Inventory Operations', 'Lab Allocation & QA', 'RF Chamber Assets', 'Global Hardware Registry'].map((ws) => (
-                    <button
-                      key={ws}
-                      type="button"
-                      onClick={() => {
-                        setSelectedWorkspace(ws);
-                        setWorkspaceOpen(false);
-                      }}
-                      className={`w-full text-left px-3 py-1.5 text-xs flex items-center justify-between hover:bg-[#1E4637] ${
-                        selectedWorkspace === ws ? 'text-white font-medium bg-[#28513F]' : 'text-[#8EA79B]'
-                      }`}
-                    >
-                      <span>{ws}</span>
-                      {selectedWorkspace === ws && <CheckCircle2 className="w-3 h-3 text-[#247A51]" />}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
         {/* Navigation Items */}
-        <div className="flex-1 px-2.5 py-2 overflow-y-auto sidebar-scroll space-y-1">
+        <div className="flex-1 px-3 py-3 overflow-y-auto sidebar-scroll space-y-1">
           {/* Overview */}
           {mainNavItems.map((item) => {
             const Icon = item.icon;
@@ -239,21 +192,21 @@ export function AppSidebar({
                 key={item.key}
                 type="button"
                 onClick={() => handleNavClick(item.key)}
-                className={`w-full flex items-center gap-3 px-2.5 py-2 rounded-md text-xs font-medium transition-colors text-left ${
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13.5px] font-medium transition-colors text-left ${
                   isActive
-                    ? 'bg-[#28513F] text-[#FFFFFF] font-semibold'
+                    ? 'bg-[#28513F] text-[#FFFFFF] font-semibold shadow-sm'
                     : 'text-[#E5EDE8] hover:bg-[#1E4637] hover:text-white'
                 } ${collapsed ? 'justify-center px-0' : ''}`}
                 title={collapsed ? item.label : undefined}
               >
-                <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-[#FFFFFF]' : 'text-[#8EA79B]'}`} />
+                <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-[#FFFFFF]' : 'text-[#A3BFB2]'}`} />
                 {!collapsed && <span className="flex-1 truncate">{item.label}</span>}
               </button>
             );
           })}
 
           {/* Dedicated Inventory Categories */}
-          <div className="pt-3 px-2 pb-1 text-[10px] font-semibold text-[#8EA79B] uppercase tracking-wider">
+          <div className="pt-4 px-2 pb-1.5 text-[11px] font-bold text-[#A3BFB2] uppercase tracking-wider">
             {!collapsed ? 'Inventory Categories' : '•••'}
           </div>
 
@@ -265,19 +218,19 @@ export function AppSidebar({
                 key={item.key}
                 type="button"
                 onClick={() => handleNavClick(item.key)}
-                className={`w-full flex items-center gap-3 px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors text-left ${
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-[13.5px] font-medium transition-colors text-left ${
                   isActive
-                    ? 'bg-[#28513F] text-[#FFFFFF] font-semibold'
+                    ? 'bg-[#28513F] text-[#FFFFFF] font-semibold shadow-sm'
                     : 'text-[#E5EDE8] hover:bg-[#1E4637] hover:text-white'
                 } ${collapsed ? 'justify-center px-0' : ''}`}
                 title={collapsed ? item.label : undefined}
               >
-                <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-[#FFFFFF]' : 'text-[#8EA79B]'}`} />
+                <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-[#FFFFFF]' : 'text-[#A3BFB2]'}`} />
                 {!collapsed && <span className="flex-1 truncate">{item.label}</span>}
                 {!collapsed && item.badge && (
                   <span
-                    className={`text-[10px] px-1.5 py-0.2 rounded font-mono ${
-                      isActive ? 'bg-[#1E4637] text-white' : 'bg-[#1F4738]/60 text-[#8EA79B]'
+                    className={`text-xs px-2 py-0.5 rounded-full font-mono font-medium ${
+                      isActive ? 'bg-[#1E4637] text-white' : 'bg-[#1F4738] text-[#C2D6CC]'
                     }`}
                   >
                     {item.badge}
@@ -288,7 +241,7 @@ export function AppSidebar({
           })}
 
           {/* Operations & System */}
-          <div className="pt-3 px-2 pb-1 text-[10px] font-semibold text-[#8EA79B] uppercase tracking-wider">
+          <div className="pt-4 px-2 pb-1.5 text-[11px] font-bold text-[#A3BFB2] uppercase tracking-wider">
             {!collapsed ? 'Operations' : '•••'}
           </div>
 
@@ -306,17 +259,17 @@ export function AppSidebar({
                   key={item.key}
                   type="button"
                   onClick={() => handleNavClick(item.key)}
-                  className={`w-full flex items-center gap-3 px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors text-left ${
+                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-[13.5px] font-medium transition-colors text-left ${
                     isActive
-                      ? 'bg-[#28513F] text-[#FFFFFF] font-semibold'
+                      ? 'bg-[#28513F] text-[#FFFFFF] font-semibold shadow-sm'
                       : 'text-[#E5EDE8] hover:bg-[#1E4637] hover:text-white'
                   } ${collapsed ? 'justify-center px-0' : ''}`}
                   title={collapsed ? item.label : undefined}
                 >
-                  <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-[#FFFFFF]' : 'text-[#8EA79B]'}`} />
+                  <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-[#FFFFFF]' : 'text-[#A3BFB2]'}`} />
                   {!collapsed && <span className="flex-1 truncate">{item.label}</span>}
                   {!collapsed && item.badge && (
-                    <span className="text-[10px] px-1.5 py-0.5 rounded font-mono bg-[#1E4637] text-[#8EA79B] border border-[#28513F]">
+                    <span className="text-[11px] px-2 py-0.5 rounded font-mono font-medium bg-[#1E4637] text-[#C2D6CC] border border-[#28513F]">
                       {item.badge}
                     </span>
                   )}
@@ -328,14 +281,14 @@ export function AppSidebar({
             <button
               type="button"
               onClick={() => handleNavClick('settings')}
-              className={`w-full flex items-center gap-3 px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors text-left ${
+              className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-[13.5px] font-medium transition-colors text-left ${
                 activeNav === 'settings'
-                  ? 'bg-[#28513F] text-[#FFFFFF] font-semibold'
+                  ? 'bg-[#28513F] text-[#FFFFFF] font-semibold shadow-sm'
                   : 'text-[#E5EDE8] hover:bg-[#1E4637] hover:text-white'
               } ${collapsed ? 'justify-center px-0' : ''}`}
               title={collapsed ? 'Settings' : undefined}
             >
-              <Settings className={`w-4 h-4 flex-shrink-0 ${activeNav === 'settings' ? 'text-white' : 'text-[#8EA79B]'}`} />
+              <Settings className={`w-4 h-4 flex-shrink-0 ${activeNav === 'settings' ? 'text-white' : 'text-[#A3BFB2]'}`} />
               {!collapsed && <span className="flex-1 truncate">Settings</span>}
             </button>
           )}
