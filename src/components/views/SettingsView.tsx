@@ -19,8 +19,7 @@ import {
   RotateCcw, 
   Save, 
   X, 
-  ShieldAlert,
-  Server
+  ShieldAlert
 } from 'lucide-react';
 import { useDropdowns, DropdownCategory, DropdownItem } from '@/context/DropdownContext';
 import { useAuth } from '@/context/AuthContext';
@@ -40,7 +39,7 @@ export function SettingsView() {
   } = useDropdowns();
 
   // Active top-level settings tab
-  const [activeTab, setActiveTab] = useState<'dropdowns' | 'facilities' | 'ai' | 'infrastructure'>('dropdowns');
+  const [activeTab, setActiveTab] = useState<'dropdowns' | 'facilities' | 'ai'>('dropdowns');
 
   // Active dropdown category
   const [selectedCategory, setSelectedCategory] = useState<DropdownCategory>('locations');
@@ -153,7 +152,7 @@ export function SettingsView() {
             Platform Administration & Settings
           </h2>
           <p className="text-xs text-[#64748B] mt-0.5">
-            Configure system dropdown parameters, facility synchronization, AI copilot policies, and infrastructure.
+            Configure system dropdown parameters, facility synchronization, and AI copilot policies.
           </p>
         </div>
 
@@ -208,19 +207,6 @@ export function SettingsView() {
         >
           <Cpu className="w-3.5 h-3.5" />
           <span>AI Assistant Guardrails</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveTab('infrastructure')}
-          className={`flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-t transition-colors border-b-2 ${
-            activeTab === 'infrastructure'
-              ? 'border-[#247A51] text-[#247A51] bg-[#FFFFFF]'
-              : 'border-transparent text-[#64748B] hover:text-[#172A21] hover:bg-[#F9FAF9]'
-          }`}
-        >
-          <Server className="w-3.5 h-3.5" />
-          <span>Infrastructure & Deployment</span>
         </button>
       </div>
 
@@ -385,21 +371,19 @@ export function SettingsView() {
                             <button
                               type="button"
                               onClick={() => openEditModal(item)}
-                              className="p-1 text-[#64748B] hover:text-[#172A21] hover:bg-[#E5EBE6] rounded"
+                              className="p-1.5 text-[#475569] hover:text-[#0B1310] hover:bg-[#E5EBE6] rounded transition-colors"
                               title="Edit option"
                             >
                               <Edit2 className="w-3.5 h-3.5" />
                             </button>
-                            {!item.isSystemDefault && (
-                              <button
-                                type="button"
-                                onClick={() => handleDelete(item.id, item.label)}
-                                className="p-1 text-[#DC2626] hover:bg-[#FEE2E2] rounded"
-                                title="Delete option"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
-                            )}
+                            <button
+                              type="button"
+                              onClick={() => handleDelete(item.id, item.label)}
+                              className="p-1.5 text-[#DC2626] hover:text-[#B91C1C] hover:bg-[#FEE2E2] rounded transition-colors"
+                              title={`Delete option "${item.label}"`}
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
                           </div>
                         </td>
                       </tr>
@@ -474,48 +458,6 @@ export function SettingsView() {
                 <p className="text-[11px] text-[#64748B]">Employee role accounts can query inventory but cannot execute hardware custody transfers.</p>
               </div>
             </label>
-          </div>
-        </div>
-      )}
-
-      {/* ========================================================= */}
-      {/* TAB 4: INFRASTRUCTURE & DEPLOYMENT METADATA              */}
-      {/* ========================================================= */}
-      {activeTab === 'infrastructure' && (
-        <div className="bg-[#FFFFFF] border border-[#E5EBE6] rounded-lg p-4 space-y-4">
-          <div className="flex items-center gap-2 pb-2 border-b border-[#E5EBE6]">
-            <Server className="w-4 h-4 text-[#247A51]" />
-            <h3 className="text-xs font-bold text-[#172A21]">Production Architecture & Service Endpoints</h3>
-          </div>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-            <div className="p-3 rounded border border-[#E5EBE6] bg-[#F9FAF9]">
-              <span className="text-[10px] uppercase font-bold text-[#64748B] tracking-wider block mb-1">Frontend Layer</span>
-              <div className="font-semibold text-[#172A21]">Next.js App Router (Turbopack)</div>
-              <div className="text-[11px] text-[#64748B] mt-0.5">Platform: Vercel Production</div>
-              <div className="text-[10px] font-mono text-[#247A51] mt-1">HTTPS • HSTS • Secure Cookies</div>
-            </div>
-
-            <div className="p-3 rounded border border-[#E5EBE6] bg-[#F9FAF9]">
-              <span className="text-[10px] uppercase font-bold text-[#64748B] tracking-wider block mb-1">AI Backend Layer</span>
-              <div className="font-semibold text-[#172A21]">FastAPI + Pydantic v2</div>
-              <div className="text-[11px] text-[#64748B] mt-0.5">Platform: Hugging Face Spaces (Docker Port 7860)</div>
-              <div className="text-[10px] font-mono text-[#247A51] mt-1">Llama-3.2-3B-Instruct • Local Rule Fallback</div>
-            </div>
-
-            <div className="p-3 rounded border border-[#E5EBE6] bg-[#F9FAF9]">
-              <span className="text-[10px] uppercase font-bold text-[#64748B] tracking-wider block mb-1">Database & Auth</span>
-              <div className="font-semibold text-[#172A21]">Supabase PostgreSQL 15</div>
-              <div className="text-[11px] text-[#64748B] mt-0.5">RLS Enabled • SSR Auth Helpers • Partial Indexes</div>
-              <div className="text-[10px] font-mono text-[#247A51] mt-1">Atomic Transfer Procedures • Append-Only Audit</div>
-            </div>
-
-            <div className="p-3 rounded border border-[#E5EBE6] bg-[#F9FAF9]">
-              <span className="text-[10px] uppercase font-bold text-[#64748B] tracking-wider block mb-1">Security & Secret Management</span>
-              <div className="font-semibold text-[#172A21]">Non-Exposed Service Role Keys</div>
-              <div className="text-[11px] text-[#64748B] mt-0.5">Zero wildcard CORS • Client-isolated privileged APIs</div>
-              <div className="text-[10px] font-mono text-[#247A51] mt-1">Cryptographic HMAC Idempotency Guards</div>
-            </div>
           </div>
         </div>
       )}
