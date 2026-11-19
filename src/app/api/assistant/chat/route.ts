@@ -68,7 +68,8 @@ async function getUnifiedInventory(): Promise<{
       if (asgnList) {
         asgnList.forEach((a: any) => {
           const empName = a.profiles?.full_name || profMap.get(a.employee_id) || 'Assigned';
-          if (a.equipment_tag) activeAsgnMap.set(a.equipment_tag.toUpperCase(), empName);
+          // DB column is `inventory_tag`, not `equipment_tag`
+          if (a.inventory_tag) activeAsgnMap.set(a.inventory_tag.toUpperCase(), empName);
         });
       }
 
@@ -351,11 +352,29 @@ export async function POST(req: NextRequest) {
     if (textLower.includes('assign') || textLower.includes('transfer') || textLower.includes('allocate') || textLower.includes('reassign')) {
       const isTransfer = textLower.includes('transfer') || textLower.includes('reassign');
       const unit = matchedItem || items.find(i => i.status === 'Available') || items[0];
-      const targetEmp = matchedProfile || profiles.find(p => p.full_name.toLowerCase().includes('aarif')) || profiles[0];
+
+      // If no employee mentioned, ask for one
+      if (!matchedProfile) {
+        const teamNames = profiles
+          .filter(p => p.role !== 'admin')
+          .map(p => p.full_name)
+          .join(', ');
+        return NextResponse.json({
+          message_id: msgId,
+          conversation_id: convId,
+          sender: 'assistant',
+          timestamp,
+          text: `I found unit **${unit.tag}** (${unit.status}). Who should I assign it to?\n\nAvailable team members: ${teamNames}\n\nTry: *"Assign ${unit.tag} to [Name]"*`,
+          status: 'success',
+          engine: 'candela-database-ai',
+        });
+      }
+
+      const targetEmp = matchedProfile;
       const targetEmpName = targetEmp.full_name;
       
-      let targetProject = unit.project || 'Project Allocation';
-      const projMatch = textLower.match(/for\s+(?:project\s+)?([a-z0-9\s_-]+)(?:\.|$)/i);
+      let targetProject = unit.project || 'General Allocation';
+      const projMatch = textLower.match(/for\s+(?:project\s+)?([a-z0-9\s_-]+?)(?:\.|$)/i);
       if (projMatch) targetProject = projMatch[1].trim();
 
       return NextResponse.json({
@@ -363,7 +382,7 @@ export async function POST(req: NextRequest) {
         conversation_id: convId,
         sender: 'assistant',
         timestamp,
-        text: `Prepared ${isTransfer ? 'custody transfer' : 'assignment'} preview for ${unit.tag} (${unit.model}). Please review and confirm:`,
+        text: `Prepared ${isTransfer ? 'custody transfer' : 'assignment'} preview for **${unit.tag}** (${unit.model}). Please review and confirm:`,
         action_preview: {
           id: `act-${Date.now().toString(36)}`,
           intent: isTransfer ? 'equipment_transfer' : 'equipment_assignment',

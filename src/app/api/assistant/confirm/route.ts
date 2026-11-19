@@ -61,6 +61,7 @@ export async function POST(req: NextRequest) {
     }
 
     const intent = (action?.intent || action?.type || '').toLowerCase();
+    console.log('[confirm] intent:', intent, '| action keys:', action ? Object.keys(action) : 'none');
     const rawCategory = (action?.category || 'lanforge').toLowerCase();
     let category = 
       rawCategory.includes('desk') ? 'desktop' : 
@@ -291,7 +292,7 @@ export async function POST(req: NextRequest) {
     }
 
     // C. EXECUTE STATUS UPDATE
-    if (intent.includes('status')) {
+    if (intent.includes('status_update') || intent.includes('maintenance')) {
       if (!unitId) {
         return NextResponse.json({ error: `Unit ${unitTag} not found.` }, { status: 404 });
       }
