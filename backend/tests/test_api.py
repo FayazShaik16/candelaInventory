@@ -166,7 +166,7 @@ def test_employee_cannot_mutate():
 def test_equipment_transfer_preview_and_confirm():
     resp = client.post(
         "/chat",
-        json={"message": "Transfer LF-001 to Sarah Chen"},
+        json={"message": "Transfer LF-001 to Sirisha"},
         headers=ADMIN_HEADERS
     )
     assert resp.status_code == 200
@@ -186,7 +186,7 @@ def test_equipment_transfer_preview_and_confirm():
 def test_equipment_return_preview_and_confirm():
     resp = client.post(
         "/chat",
-        json={"message": "Return MOB-001 from Sarah Chen"},
+        json={"message": "Return MOB-001 from Sirisha"},
         headers=ADMIN_HEADERS
     )
     assert resp.status_code == 200

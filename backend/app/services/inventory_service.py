@@ -22,7 +22,7 @@ INITIAL_LANFORGES = [
         "no_of_11n_clients": 8,
         "status": "In-Use",
         "comments": "Configured for dual 5 GHz 160MHz channel bonding stress test matrix.",
-        "previously_used_by": ["Sarah Chen"],
+        "previously_used_by": ["Sirisha"],
         "radios": [
             {"id": "rad-01", "chipset": "Qualcomm QCN9274", "quantity": 2},
             {"id": "rad-02", "chipset": "Broadcom BCM4375", "quantity": 1}
@@ -47,7 +47,7 @@ INITIAL_LANFORGES = [
         "no_of_11n_clients": 0,
         "status": "Available",
         "comments": "Wi-Fi 7 testbed ready for immediate project assignment.",
-        "previously_used_by": ["Elena Rostova"],
+        "previously_used_by": ["Sirisha"],
         "radios": [
             {"id": "rad-03", "chipset": "Qualcomm QCN9274", "quantity": 4}
         ],
@@ -127,7 +127,7 @@ INITIAL_MOBILES = [
         "model": "Pixel 9 Pro",
         "project": "Mobile Fleet Multi-Station Roaming Suite",
         "poc_id": "usr-emp-02",
-        "poc_name": "Sarah Chen",
+        "poc_name": "Deepika",
         "status": "In-Use",
         "is_archived": False
     },
@@ -199,7 +199,7 @@ INITIAL_CHAMBERS = [
         "chamber_type": "Over-The-Air Chamber (OTA)",
         "chamber_id": "CH-OTA-02",
         "used_by_id": "usr-emp-02",
-        "used_by_name": "Sarah Chen",
+        "used_by_name": "Sirisha",
         "project": "Antenna Characterization",
         "status": "In-Use",
         "is_archived": False
@@ -229,14 +229,20 @@ INITIAL_CHAMBERS = [
 ]
 
 INITIAL_EMPLOYEES = [
-    {"id": "usr-admin-01", "full_name": "Alex Mercer", "email": "alex.mercer@candelatech.com", "role": "admin", "account_status": "active"},
-    {"id": "usr-emp-01", "full_name": "Fayaz Ahmed", "email": "fayaz.ahmed@candelatech.com", "role": "employee", "account_status": "active"},
-    {"id": "usr-emp-02", "full_name": "Sarah Chen", "email": "sarah.chen@candelatech.com", "role": "employee", "account_status": "active"},
-    {"id": "usr-emp-03", "full_name": "Elena Rostova", "email": "elena.r@candelatech.com", "role": "employee", "account_status": "active"},
-    {"id": "usr-emp-04", "full_name": "Rahul Verma", "email": "rahul.v@candelatech.com", "role": "employee", "account_status": "active"},
-    {"id": "usr-emp-05", "full_name": "Priya Sharma", "email": "priya.s@candelatech.com", "role": "employee", "account_status": "active"},
-    {"id": "usr-emp-06", "full_name": "Sneha Patel", "email": "sneha.p@candelatech.com", "role": "employee", "account_status": "active"},
-    {"id": "usr-emp-inactive", "full_name": "Mark Vance", "email": "mark.v@candelatech.com", "role": "employee", "account_status": "inactive"}
+    {"id": "usr-admin-01", "full_name": "Admin Supervisor", "email": "admin@candela.internal", "role": "admin", "account_status": "active"},
+    {"id": "usr-emp-01", "full_name": "Sirisha", "email": "sirisha@candelatech.com", "role": "employee", "account_status": "active"},
+    {"id": "usr-emp-02", "full_name": "Tejas", "email": "tejas@candelatech.com", "role": "employee", "account_status": "active"},
+    {"id": "usr-emp-03", "full_name": "Deepika", "email": "deepika@candelatech.com", "role": "employee", "account_status": "active"},
+    {"id": "usr-emp-04", "full_name": "Shyamala", "email": "shyamala@candelatech.com", "role": "employee", "account_status": "active"},
+    {"id": "usr-emp-05", "full_name": "Pranathi", "email": "pranathi@candelatech.com", "role": "employee", "account_status": "active"},
+    {"id": "usr-emp-06", "full_name": "Lokesh", "email": "lokesh@candelatech.com", "role": "employee", "account_status": "active"},
+    {"id": "usr-emp-07", "full_name": "Aarif", "email": "aarif@candelatech.com", "role": "employee", "account_status": "active"},
+    {"id": "usr-emp-08", "full_name": "Venkat", "email": "venkat@candelatech.com", "role": "employee", "account_status": "active"},
+    {"id": "usr-emp-09", "full_name": "Bindu", "email": "bindu@candelatech.com", "role": "employee", "account_status": "active"},
+    {"id": "usr-emp-10", "full_name": "Chaitanya", "email": "chaitanya@candelatech.com", "role": "employee", "account_status": "active"},
+    {"id": "usr-emp-11", "full_name": "Tarun", "email": "tarun@candelatech.com", "role": "employee", "account_status": "active"},
+    {"id": "usr-emp-12", "full_name": "Tejaswari", "email": "tejaswari@candelatech.com", "role": "employee", "account_status": "active"},
+    {"id": "usr-emp-13", "full_name": "Fayaz Shaik", "email": "fayaz@candelatech.com", "role": "employee", "account_status": "active"}
 ]
 
 class InventoryRepository:

@@ -166,7 +166,7 @@ export function DashboardLayout({ initialNav = 'dashboard' }: DashboardLayoutPro
       description: `Hardware asset removed from active inventory list.`,
       timestamp: 'Just now',
       user: {
-        name: user?.full_name || 'Alex Mercer',
+        name: user?.full_name || 'Admin Supervisor',
         role: role === 'admin' ? 'Operations Lead' : 'Engineer',
       },
     };

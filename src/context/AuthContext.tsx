@@ -118,7 +118,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setSessionCookie(null);
           }
         } else {
-          // Default initial session for immediate exploration is Admin Alex Mercer
+          // Default initial session for immediate exploration is Admin Supervisor
           const defaultAdmin = INITIAL_MOCK_PROFILES[0];
           setUser(defaultAdmin);
           setSessionCookie(defaultAdmin);

@@ -13,16 +13,16 @@ class AuthenticatedUser(BaseModel):
 # Default fallback user for development/local demo when auth headers are forwarded
 DEMO_ADMIN = AuthenticatedUser(
     user_id="usr-admin-01",
-    email="alex.mercer@candelatech.com",
-    full_name="Alex Mercer",
+    email="admin@candela.internal",
+    full_name="Admin Supervisor",
     role="admin",
     account_status="active"
 )
 
 DEMO_EMPLOYEE = AuthenticatedUser(
     user_id="usr-emp-01",
-    email="fayaz.ahmed@candelatech.com",
-    full_name="Fayaz Ahmed",
+    email="sirisha@candelatech.com",
+    full_name="Sirisha",
     role="employee",
     account_status="active"
 )

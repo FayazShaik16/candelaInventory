@@ -77,24 +77,24 @@ export function AIAssistantPanel({
 
   const suggestedPrompts = [
     {
-      label: 'Assign LF-001 to Fayaz',
-      query: 'Assign LF-521B-001 to Fayaz Ahmed for Wi-Fi 6E AP test.',
+      label: 'Assign LF-01 to Sirisha',
+      query: 'Assign LF-OPEL-523C-01 to Sirisha for Netgear project.',
     },
     {
       label: 'Check Available Units',
       query: 'Show me all available hardware units ready for assignment.',
     },
     {
-      label: 'Add 2 Intel AX210 to LF-001',
-      query: 'Add 2 Intel AX210 radios to LF-521B-001.',
+      label: 'Show LANforges in OPEL',
+      query: 'Show all LANforge testbeds located in OPEL.',
     },
     {
       label: 'Set DT-01 Under Maintenance',
-      query: 'Set DT-DELL-01 to Under Maintenance for diagnostic run.',
+      query: 'Set DT-01 to Under Maintenance for diagnostic run.',
     },
     {
-      label: 'Sarah Chen Equipment',
-      query: 'What equipment is currently assigned to Sarah Chen?',
+      label: 'Sirisha Equipment',
+      query: 'What equipment is currently assigned to Sirisha?',
     },
   ];
 

@@ -46,23 +46,29 @@ class EntityExtractor:
 
     @staticmethod
     def extract_employee_name(text: str) -> Optional[str]:
-        # Known employees or pattern "to <Name>" / "by <Name>" / "used by <Name>"
+        # Known real Candela team members or pattern "to <Name>" / "by <Name>" / "used by <Name>"
         known = [
-            "fayaz ahmed", "fayaz", "sarah chen", "sarah", "elena rostova", "elena", 
-            "alex mercer", "alex", "mark vance", "rahul verma", "rahul", 
-            "priya sharma", "priya", "sneha patel", "sneha"
+            "sirisha", "tejas", "deepika", "shyamala", "pranathi", "lokesh", 
+            "aarif", "venkat", "bindu", "chaitanya", "tarun", "tejaswari", 
+            "fayaz", "admin supervisor", "admin"
         ]
         text_lower = text.lower()
         for k in known:
             if re.search(rf'\b{k}\b', text_lower):
-                if "fayaz" in k: return "Fayaz Ahmed"
-                if "sarah" in k: return "Sarah Chen"
-                if "elena" in k: return "Elena Rostova"
-                if "alex" in k: return "Alex Mercer"
-                if "mark" in k: return "Mark Vance"
-                if "rahul" in k: return "Rahul Verma"
-                if "priya" in k: return "Priya Sharma"
-                if "sneha" in k: return "Sneha Patel"
+                if "sirisha" in k: return "Sirisha"
+                if "tejaswari" in k: return "Tejaswari"
+                if "tejas" in k: return "Tejas"
+                if "deepika" in k: return "Deepika"
+                if "shyamala" in k: return "Shyamala"
+                if "pranathi" in k: return "Pranathi"
+                if "lokesh" in k: return "Lokesh"
+                if "aarif" in k: return "Aarif"
+                if "venkat" in k: return "Venkat"
+                if "bindu" in k: return "Bindu"
+                if "chaitanya" in k: return "Chaitanya"
+                if "tarun" in k: return "Tarun"
+                if "fayaz" in k: return "Fayaz Shaik"
+                if "admin" in k: return "Admin Supervisor"
 
         m = re.search(r'(?:to|by|for|under|assigned to|custodian)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)', text)
         if m:
