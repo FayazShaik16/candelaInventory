@@ -2,17 +2,13 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { 
-  Search, 
   Bell, 
-  PanelRight, 
-  PanelRightClose,
   Menu, 
   ChevronRight, 
   CheckCircle2, 
   AlertTriangle, 
   Clock, 
   Plus,
-  Sparkles,
   ShieldCheck,
   LogOut,
   User,
@@ -24,20 +20,16 @@ import { useAuth } from '@/context/AuthContext';
 interface AppHeaderProps {
   activeNav: NavItemKey;
   onOpenMobileSidebar: () => void;
-  assistantOpen: boolean;
-  onToggleAssistant: () => void;
-  searchQuery: string;
-  onSearchChange: (q: string) => void;
+  assistantOpen?: boolean;
+  onToggleAssistant?: () => void;
+  searchQuery?: string;
+  onSearchChange?: (q: string) => void;
   onOpenAddUnit: () => void;
 }
 
 export function AppHeader({
   activeNav,
   onOpenMobileSidebar,
-  assistantOpen,
-  onToggleAssistant,
-  searchQuery,
-  onSearchChange,
   onOpenAddUnit,
 }: AppHeaderProps) {
   const { user, role, logout } = useAuth();
@@ -141,24 +133,6 @@ export function AppHeader({
         </div>
       </div>
 
-      {/* Center: Global Search Bar */}
-      <div className="flex-1 max-w-md mx-2 hidden md:block">
-        <div className="relative">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#475569]" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
-            placeholder="Global search asset tag, serial, model, location..."
-            className="w-full h-9 pl-9 pr-12 text-sm bg-[#F5F7F5] hover:bg-[#F0F2F0] focus:bg-[#FFFFFF] border border-[#CBD5E1] focus:border-[#1E6E45] rounded-md text-[#0B1310] placeholder:text-[#64748B] focus:outline-none transition-colors"
-          />
-          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-[#E2E8F0] text-[11px] font-mono font-medium text-[#334155]">
-            <span>Ctrl</span>
-            <span>K</span>
-          </div>
-        </div>
-      </div>
-
       {/* Right: Actions, Notifications, Role & Profile menu */}
       <div className="flex items-center gap-2">
         {/* Quick Add Button (Admin only) */}
@@ -226,26 +200,6 @@ export function AppHeader({
             </div>
           )}
         </div>
-
-        {/* Right Assistant Toggle Button */}
-        <button
-          type="button"
-          onClick={onToggleAssistant}
-          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium border transition-colors ${
-            assistantOpen
-              ? 'bg-[#EBF4EF] text-[#247A51] border-[#247A51]/30'
-              : 'bg-[#FFFFFF] text-[#64748B] border-[#E5EBE6] hover:bg-[#F5F7F5] hover:text-[#172A21]'
-          }`}
-          title={assistantOpen ? 'Collapse Assistant' : 'Open Assistant'}
-        >
-          <Sparkles className="w-3.5 h-3.5 text-[#247A51]" />
-          <span className="hidden sm:inline">Assistant</span>
-          {assistantOpen ? (
-            <PanelRightClose className="w-3.5 h-3.5 hidden md:inline ml-0.5 text-[#247A51]" />
-          ) : (
-            <PanelRight className="w-3.5 h-3.5 hidden md:inline ml-0.5 text-[#64748B]" />
-          )}
-        </button>
 
         {/* User Account Menu in Top Header */}
         <div className="relative border-l border-[#E5EBE6] pl-2 ml-1" ref={profileRef}>

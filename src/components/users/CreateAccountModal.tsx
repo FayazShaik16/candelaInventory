@@ -135,22 +135,66 @@ export function CreateAccountModal({
             </div>
           </div>
 
-          {/* Role and Initial Status */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-medium text-[#172A21] mb-1">
-                Role Assignment *
+          {/* Access Control & Permissions Section */}
+          <div className="space-y-2 pt-2 border-t border-[#E5EBE6]">
+            <div className="flex items-center justify-between">
+              <label className="block text-xs font-semibold text-[#172A21]">
+                Access Control & Permissions *
               </label>
-              <select
-                value={role}
-                onChange={(e) => setRole(e.target.value as UserRole)}
-                className="w-full px-2.5 py-1.5 bg-[#FFFFFF] border border-[#E5EBE6] rounded text-xs text-[#172A21] focus:outline-none focus:border-[#247A51]"
-              >
-                <option value="employee">Employee (Standard)</option>
-                <option value="admin">Admin (Full Clearance)</option>
-              </select>
+              <span className="text-[10px] text-[#64748B]">Non-admins default to Read-Only</span>
             </div>
 
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              {/* Option 1: Read-Only (Default for everyone except Admin) */}
+              <div
+                onClick={() => setRole('employee')}
+                className={`p-3 rounded-lg border cursor-pointer transition-all ${
+                  role === 'employee'
+                    ? 'border-[#247A51] bg-[#F0FDF4] ring-1 ring-[#247A51]'
+                    : 'border-[#E5EBE6] bg-white hover:border-[#CBD5E1]'
+                }`}
+              >
+                <div className="flex items-center justify-between mb-1">
+                  <span className="font-bold text-xs text-[#172A21] flex items-center gap-1.5">
+                    <span className={`w-2 h-2 rounded-full ${role === 'employee' ? 'bg-[#247A51]' : 'bg-[#94A3B8]'}`} />
+                    Read-Only Access
+                  </span>
+                  <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-white text-[#247A51] border border-[#DCFCE7] font-semibold">
+                    Default
+                  </span>
+                </div>
+                <p className="text-[11px] text-[#64748B] leading-snug">
+                  Strictly view-only access across all inventory categories and testbeds. Cannot modify or delete assets.
+                </p>
+              </div>
+
+              {/* Option 2: Full Administrator Access */}
+              <div
+                onClick={() => setRole('admin')}
+                className={`p-3 rounded-lg border cursor-pointer transition-all ${
+                  role === 'admin'
+                    ? 'border-[#247A51] bg-[#F0FDF4] ring-1 ring-[#247A51]'
+                    : 'border-[#E5EBE6] bg-white hover:border-[#CBD5E1]'
+                }`}
+              >
+                <div className="flex items-center justify-between mb-1">
+                  <span className="font-bold text-xs text-[#172A21] flex items-center gap-1.5">
+                    <span className={`w-2 h-2 rounded-full ${role === 'admin' ? 'bg-[#247A51]' : 'bg-[#94A3B8]'}`} />
+                    Full Admin Access
+                  </span>
+                  <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-[#173D30] text-white">
+                    Admin
+                  </span>
+                </div>
+                <p className="text-[11px] text-[#64748B] leading-snug">
+                  Full clearance to register, edit, transfer hardware, configure system settings, and manage users.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Account Status and Temporary Password */}
+          <div className="grid grid-cols-2 gap-3 pt-1">
             <div>
               <label className="block text-xs font-medium text-[#172A21] mb-1">
                 Account Status *
@@ -164,23 +208,19 @@ export function CreateAccountModal({
                 <option value="inactive">Inactive</option>
               </select>
             </div>
-          </div>
 
-          {/* Optional Temporary Password */}
-          <div>
-            <label className="block text-xs font-medium text-[#172A21] mb-1">
-              Temporary Password (Optional)
-            </label>
-            <input
-              type="text"
-              value={temporaryPassword}
-              onChange={(e) => setTemporaryPassword(e.target.value)}
-              placeholder="Leave blank to auto-generate"
-              className="w-full px-2.5 py-1.5 bg-[#FFFFFF] border border-[#E5EBE6] rounded text-xs font-mono text-[#172A21] focus:outline-none focus:border-[#247A51]"
-            />
-            <p className="text-[10px] text-[#64748B] mt-1">
-              If omitted, a secure random key will be provisioned in Supabase.
-            </p>
+            <div>
+              <label className="block text-xs font-medium text-[#172A21] mb-1">
+                Temporary Password (Optional)
+              </label>
+              <input
+                type="text"
+                value={temporaryPassword}
+                onChange={(e) => setTemporaryPassword(e.target.value)}
+                placeholder="Leave blank to auto-generate"
+                className="w-full px-2.5 py-1.5 bg-[#FFFFFF] border border-[#E5EBE6] rounded text-xs font-mono text-[#172A21] focus:outline-none focus:border-[#247A51]"
+              />
+            </div>
           </div>
 
           {/* Send invite check */}

@@ -38,9 +38,6 @@ export function SettingsView() {
     resetAllToDefaults 
   } = useDropdowns();
 
-  // Active top-level settings tab
-  const [activeTab, setActiveTab] = useState<'dropdowns' | 'facilities' | 'ai'>('dropdowns');
-
   // Active dropdown category
   const [selectedCategory, setSelectedCategory] = useState<DropdownCategory>('locations');
 
@@ -152,7 +149,7 @@ export function SettingsView() {
             Platform Administration & Settings
           </h2>
           <p className="text-xs text-[#64748B] mt-0.5">
-            Configure system dropdown parameters, facility synchronization, and AI copilot policies.
+            Configure system dropdown parameters and custom hardware options.
           </p>
         </div>
 
@@ -165,57 +162,9 @@ export function SettingsView() {
         )}
       </div>
 
-      {/* Main Tabs Navigation */}
-      <div className="flex items-center gap-1 border-b border-[#E5EBE6] pb-px">
-        <button
-          type="button"
-          onClick={() => setActiveTab('dropdowns')}
-          className={`flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-t transition-colors border-b-2 ${
-            activeTab === 'dropdowns'
-              ? 'border-[#247A51] text-[#247A51] bg-[#FFFFFF]'
-              : 'border-transparent text-[#64748B] hover:text-[#172A21] hover:bg-[#F9FAF9]'
-          }`}
-        >
-          <ListFilter className="w-3.5 h-3.5" />
-          <span>Dropdown Menu Values</span>
-          <span className="ml-1 text-[10px] px-1.5 py-0.2 rounded-full bg-[#EBF4EF] text-[#247A51] font-mono">
-            {items.length}
-          </span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveTab('facilities')}
-          className={`flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-t transition-colors border-b-2 ${
-            activeTab === 'facilities'
-              ? 'border-[#247A51] text-[#247A51] bg-[#FFFFFF]'
-              : 'border-transparent text-[#64748B] hover:text-[#172A21] hover:bg-[#F9FAF9]'
-          }`}
-        >
-          <Radio className="w-3.5 h-3.5" />
-          <span>Lab Facilities & Bays</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveTab('ai')}
-          className={`flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-t transition-colors border-b-2 ${
-            activeTab === 'ai'
-              ? 'border-[#247A51] text-[#247A51] bg-[#FFFFFF]'
-              : 'border-transparent text-[#64748B] hover:text-[#172A21] hover:bg-[#F9FAF9]'
-          }`}
-        >
-          <Cpu className="w-3.5 h-3.5" />
-          <span>AI Assistant Guardrails</span>
-        </button>
-      </div>
-
-      {/* ========================================================= */}
-      {/* TAB 1: DROPDOWN MENU VALUES (ADMIN REQUESTED FEATURE)     */}
-      {/* ========================================================= */}
-      {activeTab === 'dropdowns' && (
-        <div className="space-y-4">
-          {/* Subheader bar with category selector pills */}
+      {/* DROPDOWN MENU VALUES MANAGEMENT */}
+      <div className="space-y-4">
+        {/* Subheader bar with category selector pills */}
           <div className="bg-[#FFFFFF] border border-[#E5EBE6] rounded-lg p-3">
             <div className="text-[11px] font-bold text-[#64748B] uppercase tracking-wider mb-2">
               Select Dropdown Category to Manage:
@@ -394,73 +343,6 @@ export function SettingsView() {
             </div>
           </div>
         </div>
-      )}
-
-      {/* ========================================================= */}
-      {/* TAB 2: LAB FACILITIES & HARDWARE SYNC                     */}
-      {/* ========================================================= */}
-      {activeTab === 'facilities' && (
-        <div className="bg-[#FFFFFF] border border-[#E5EBE6] rounded-lg p-4 space-y-4">
-          <div className="flex items-center gap-2 pb-2 border-b border-[#E5EBE6]">
-            <Radio className="w-4 h-4 text-[#247A51]" />
-            <h3 className="text-xs font-bold text-[#172A21]">Laboratory Locations & RF Chambers</h3>
-          </div>
-          <div className="space-y-2 text-xs">
-            {[
-              { name: 'VINSR (Lab Bay 1)', role: 'Primary 160MHz Dual 5GHz Channel Bonding Bay', status: 'Online Sync', ipRange: '192.168.1.100 - 192.168.1.150' },
-              { name: 'OPEL (Lab Bay 2)', role: 'Automated 11be Multi-Link Benchmark Facility', status: 'Online Sync', ipRange: '192.168.1.151 - 192.168.1.200' },
-              { name: 'GVP (Lab Bay 3)', role: 'Long-term AP Stress & Legacy Fallback Rack', status: 'Online Sync', ipRange: '192.168.1.201 - 192.168.1.250' },
-              { name: 'San Jose RF Chamber Annex', role: 'Over-The-Air Anechoic Chamber', status: 'Standby Sync', ipRange: '10.20.4.0/24' },
-            ].map((loc, idx) => (
-              <div key={idx} className="flex items-center justify-between p-3 rounded bg-[#F9FAF9] border border-[#E5EBE6]">
-                <div>
-                  <span className="font-bold text-[#172A21] text-xs block">{loc.name}</span>
-                  <span className="text-[11px] text-[#64748B]">{loc.role}</span>
-                  <span className="text-[10px] font-mono text-[#94A3B8] block mt-0.5">Subnet: {loc.ipRange}</span>
-                </div>
-                <span className="text-[10px] text-[#247A51] bg-[#EBF4EF] border border-[#D5E9DE] px-2 py-0.5 rounded font-mono font-medium">
-                  {loc.status}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* ========================================================= */}
-      {/* TAB 3: AI ASSISTANT AUTOMATION GUARDRAILS                 */}
-      {/* ========================================================= */}
-      {activeTab === 'ai' && (
-        <div className="bg-[#FFFFFF] border border-[#E5EBE6] rounded-lg p-4 space-y-4">
-          <div className="flex items-center gap-2 pb-2 border-b border-[#E5EBE6]">
-            <Cpu className="w-4 h-4 text-[#247A51]" />
-            <h3 className="text-xs font-bold text-[#172A21]">AI Assistant Automation Permissions</h3>
-          </div>
-          <div className="space-y-3 text-xs">
-            <label className="flex items-start gap-2.5 cursor-pointer">
-              <input type="checkbox" defaultChecked className="mt-0.5 rounded text-[#247A51] accent-[#247A51]" />
-              <div>
-                <span className="font-semibold text-[#172A21]">Require manual confirmation on AI equipment reassignment</span>
-                <p className="text-[11px] text-[#64748B]">Displays Action Preview Cards with HMAC tokens prior to applying mutations to database.</p>
-              </div>
-            </label>
-            <label className="flex items-start gap-2.5 cursor-pointer">
-              <input type="checkbox" defaultChecked className="mt-0.5 rounded text-[#247A51] accent-[#247A51]" />
-              <div>
-                <span className="font-semibold text-[#172A21]">Enforce 5-minute timeout on pending action tokens</span>
-                <p className="text-[11px] text-[#64748B]">Expired tokens require re-parsing instruction to prevent stale race conditions.</p>
-              </div>
-            </label>
-            <label className="flex items-start gap-2.5 cursor-pointer">
-              <input type="checkbox" defaultChecked className="mt-0.5 rounded text-[#247A51] accent-[#247A51]" />
-              <div>
-                <span className="font-semibold text-[#172A21]">Strict Administrator clearance assertion</span>
-                <p className="text-[11px] text-[#64748B]">Employee role accounts can query inventory but cannot execute hardware custody transfers.</p>
-              </div>
-            </label>
-          </div>
-        </div>
-      )}
 
       {/* ========================================================= */}
       {/* MODAL: ADD NEW DROPDOWN OPTION                            */}

@@ -124,7 +124,7 @@ export function EditUserModal({
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-[#172A21] mb-1">
-                Role
+                Access Level & Role
               </label>
               <select
                 disabled={isSelf}
@@ -132,8 +132,8 @@ export function EditUserModal({
                 onChange={(e) => setRole(e.target.value as UserRole)}
                 className="w-full px-2.5 py-1.5 bg-[#FFFFFF] border border-[#E5EBE6] rounded text-xs text-[#172A21] focus:outline-none focus:border-[#247A51] disabled:opacity-50 disabled:bg-[#F5F7F5]"
               >
-                <option value="employee">Employee</option>
-                <option value="admin">Administrator</option>
+                <option value="employee">Read-Only Access</option>
+                <option value="admin">Admin (Full Access)</option>
               </select>
             </div>
 

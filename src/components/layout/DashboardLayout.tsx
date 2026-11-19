@@ -94,10 +94,9 @@ export function DashboardLayout({ initialNav = 'dashboard' }: DashboardLayoutPro
     }
   }, [isAdmin, activeNav]);
 
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
-  const [assistantOpen, setAssistantOpen] = useState(true);
-  const [globalSearch, setGlobalSearch] = useState('');
+  const [assistantOpen, setAssistantOpen] = useState(false);
 
   // Activities Log State
   const [activities, setActivities] = useState<ActivityLog[]>(INITIAL_ACTIVITY_LOGS);
@@ -238,10 +237,6 @@ export function DashboardLayout({ initialNav = 'dashboard' }: DashboardLayoutPro
         <AppHeader
           activeNav={activeNav}
           onOpenMobileSidebar={() => setMobileSidebarOpen(true)}
-          assistantOpen={assistantOpen}
-          onToggleAssistant={() => setAssistantOpen(!assistantOpen)}
-          searchQuery={globalSearch}
-          onSearchChange={setGlobalSearch}
           onOpenAddUnit={handleOpenAddCurrentCategory}
         />
 
@@ -704,16 +699,16 @@ export function DashboardLayout({ initialNav = 'dashboard' }: DashboardLayoutPro
             {activeNav === 'profile' && <ProfileView />}
 
           </main>
-
-          {/* 3. RIGHT-SIDE AI ASSISTANT (340px to 390px, Persistent Panel) */}
-          <AIAssistantPanel
-            isOpen={assistantOpen}
-            onToggle={() => setAssistantOpen(!assistantOpen)}
-            lanforges={lanforges}
-            onViewUnit={handleViewUnit}
-          />
         </div>
       </div>
+
+      {/* Floating AI Assistant (Bottom-Right Support Chatbot) */}
+      <AIAssistantPanel
+        isOpen={assistantOpen}
+        onToggle={() => setAssistantOpen(!assistantOpen)}
+        lanforges={lanforges}
+        onViewUnit={handleViewUnit}
+      />
 
       {/* --- MODALS & SLIDE-OVER PANELS --- */}
 

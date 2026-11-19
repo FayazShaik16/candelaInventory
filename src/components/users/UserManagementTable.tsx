@@ -354,7 +354,7 @@ export function UserManagementTable({
                           }`}
                         >
                           <ShieldCheck className="w-3 h-3" />
-                          <span>{isAdmin ? 'Admin' : 'Employee'}</span>
+                          <span>{isAdmin ? 'Admin (Full Access)' : 'Read-Only'}</span>
                         </span>
                       </td>
                     )}
@@ -419,7 +419,7 @@ export function UserManagementTable({
                             onClick={() => onChangeRole(u)}
                             disabled={isSelf}
                             className="p-1 text-[#64748B] hover:text-[#247A51] hover:bg-[#EBF4EF] rounded disabled:opacity-30 disabled:pointer-events-none"
-                            title={isAdmin ? 'Change to Employee' : 'Promote to Admin'}
+                            title={isAdmin ? 'Change to Read-Only' : 'Grant Admin / Full Access'}
                           >
                             <Shield className="w-3.5 h-3.5" />
                           </button>

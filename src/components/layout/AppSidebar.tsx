@@ -137,8 +137,13 @@ export function AppSidebar({
 
       {/* Main Sidebar Container */}
       <aside
+        onClick={() => {
+          if (collapsed) {
+            onToggleCollapse();
+          }
+        }}
         className={`fixed inset-y-0 left-0 z-50 flex flex-col bg-[#173D30] border-r border-[#1E4637] transition-all duration-200 select-none ${
-          collapsed ? 'w-[68px]' : 'w-[240px]'
+          collapsed ? 'w-[68px] cursor-pointer hover:bg-[#1a4335]' : 'w-[240px]'
         } ${
           isMobileOpen
             ? 'translate-x-0'
