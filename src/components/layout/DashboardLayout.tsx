@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { AppSidebar, NavItemKey } from './AppSidebar';
 import { AppHeader } from './AppHeader';
 import { MetricCard } from '../dashboard/MetricCard';
-import { ActivityList } from '../dashboard/ActivityList';
 import { AIAssistantPanel } from '../assistant/AIAssistantPanel';
 import { AssignmentsView } from '../views/AssignmentsView';
 import { UsersView } from '../views/UsersView';
@@ -34,10 +33,8 @@ import {
   LANforgeItem, 
   DesktopItem, 
   MobileItem, 
-  ChamberItem, 
-  ActivityLog 
+  ChamberItem 
 } from '@/types/inventory';
-import { INITIAL_ACTIVITY_LOGS } from '@/data/inventorySeed';
 import { 
   Layers, 
   CheckCircle2, 
@@ -97,9 +94,6 @@ export function DashboardLayout({ initialNav = 'dashboard' }: DashboardLayoutPro
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [assistantOpen, setAssistantOpen] = useState(false);
 
-  // Activities Log State
-  const [activities, setActivities] = useState<ActivityLog[]>(INITIAL_ACTIVITY_LOGS);
-
   // Modal / Detail States - LANforge
   const [detailLANforge, setDetailLANforge] = useState<LANforgeItem | null>(null);
   const [editLANforge, setEditLANforge] = useState<LANforgeItem | null>(null);
@@ -154,21 +148,6 @@ export function DashboardLayout({ initialNav = 'dashboard' }: DashboardLayoutPro
     else if (category === 'mobile') await archiveMobile(id);
     else if (category === 'chamber') await archiveChamber(id);
 
-    // Add activity record
-    const newLog: ActivityLog = {
-      id: `ACT-${Date.now()}`,
-      unitAssetTag: tag,
-      unitModel: category.toUpperCase(),
-      action: 'archived',
-      title: `${category.toUpperCase()} Unit Archived: ${tag}`,
-      description: `Hardware asset removed from active inventory list.`,
-      timestamp: 'Just now',
-      user: {
-        name: user?.full_name || 'Admin Supervisor',
-        role: role === 'admin' ? 'Operations Lead' : 'Engineer',
-      },
-    };
-    setActivities((prev) => [newLog, ...prev]);
     setArchiveTarget(null);
   };
 
@@ -528,12 +507,6 @@ export function DashboardLayout({ initialNav = 'dashboard' }: DashboardLayoutPro
                     </div>
                   </div>
                 </div>
-
-                {/* 5. RECENT ACTIVITY LIST */}
-                <ActivityList
-                  activities={activities}
-                  onSelectUnit={() => {}}
-                />
               </>
             )}
 
