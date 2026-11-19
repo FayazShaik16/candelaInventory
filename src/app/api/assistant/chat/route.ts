@@ -298,22 +298,61 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Identify mentioned hardware tag
-    const tagMatch = textLower.match(/\b(lf-[a-z0-9_-]+|dt-[a-z0-9_-]+|mob-[a-z0-9_-]+|ch-[a-z0-9_-]+)\b/i);
+    // Identify mentioned hardware tag / model
     let matchedItem: InventoryItemUnified | undefined;
-    if (tagMatch) {
-      const cleanTag = tagMatch[1].toUpperCase();
-      matchedItem = items.find(i => i.tag.toUpperCase() === cleanTag || i.tag.toUpperCase().includes(cleanTag));
-    }
-    if (!matchedItem && context_unit_tag) {
+    if (context_unit_tag) {
       matchedItem = items.find(i => i.tag.toUpperCase() === context_unit_tag.toUpperCase());
+    }
+
+    if (!matchedItem) {
+      // 1. Look for patterns like 523c-03, 523c03, 521b-01, lf-opel-523c-03, dt-01, mob-02, ch-01
+      const tagMatch = textLower.match(/\b(lf-[a-z0-9_-]+|dt-[a-z0-9_-]+|mob-[a-z0-9_-]+|ch-[a-z0-9_-]+|52[135][a-z0-9_-]*|ct52[135][a-z0-9_-]*)\b/i);
+      if (tagMatch) {
+        const queryClean = tagMatch[1].replace(/[\s_-]+/g, '').toLowerCase();
+        const candidates = items.filter(i => {
+          const itemTagClean = i.tag.replace(/[\s_-]+/g, '').toLowerCase();
+          return itemTagClean.includes(queryClean) || queryClean.includes(itemTagClean);
+        });
+
+        if (candidates.length === 1) {
+          matchedItem = candidates[0];
+        } else if (candidates.length > 1) {
+          if (textLower.includes('opel')) {
+            matchedItem = candidates.find(c => c.location.toLowerCase().includes('opel'));
+          } else if (textLower.includes('gvp')) {
+            matchedItem = candidates.find(c => c.location.toLowerCase().includes('gvp'));
+          } else if (textLower.includes('vinsr')) {
+            matchedItem = candidates.find(c => c.location.toLowerCase().includes('vinsr'));
+          }
+
+          if (!matchedItem && (textLower.includes('free') || textLower.includes('available'))) {
+            matchedItem = candidates.find(c => c.status === 'Available');
+          }
+
+          if (!matchedItem) {
+            matchedItem = candidates[0];
+          }
+        }
+      }
+    }
+
+    if (!matchedItem) {
+      for (const item of items) {
+        const itemTagClean = item.tag.replace(/[\s_-]+/g, '').toLowerCase();
+        const inputClean = textLower.replace(/[\s_-]+/g, '');
+        if (inputClean.includes(itemTagClean)) {
+          matchedItem = item;
+          break;
+        }
+      }
     }
 
     // 3. Action Preview: Assignment / Custody Transfer
     if (textLower.includes('assign') || textLower.includes('transfer') || textLower.includes('allocate') || textLower.includes('reassign')) {
       const isTransfer = textLower.includes('transfer') || textLower.includes('reassign');
       const unit = matchedItem || items.find(i => i.status === 'Available') || items[0];
-      const targetEmpName = matchedProfile ? matchedProfile.full_name : 'Sirisha';
+      const targetEmp = matchedProfile || profiles.find(p => p.full_name.toLowerCase().includes('aarif')) || profiles[0];
+      const targetEmpName = targetEmp.full_name;
       
       let targetProject = unit.project || 'Project Allocation';
       const projMatch = textLower.match(/for\s+(?:project\s+)?([a-z0-9\s_-]+)(?:\.|$)/i);
@@ -330,6 +369,14 @@ export async function POST(req: NextRequest) {
           intent: isTransfer ? 'equipment_transfer' : 'equipment_assignment',
           category: unit.category,
           record_identifier: unit.tag,
+          unit_id: unit.id,
+          unit_tag: unit.tag,
+          unit_model: unit.model,
+          target_employee_id: targetEmp.id,
+          target_employee_name: targetEmpName,
+          target_employee_email: targetEmp.email,
+          target_project: targetProject,
+          target_status: 'In-Use',
           title: isTransfer ? `Transfer Custody: ${unit.tag}` : `Assign Equipment: ${unit.tag}`,
           description: `Allocate hardware custody to ${targetEmpName} for ${targetProject}.`,
           changes: [
@@ -346,7 +393,40 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // 4. Action Preview: Status Update (Maintenance / Available)
+    // 4. Action Preview: Equipment Return
+    if (textLower.includes('return') || textLower.includes('check in') || textLower.includes('check-in')) {
+      const unit = matchedItem || items.find(i => i.status === 'In-Use') || items[0];
+      return NextResponse.json({
+        message_id: msgId,
+        conversation_id: convId,
+        sender: 'assistant',
+        timestamp,
+        text: `Prepared equipment check-in preview for ${unit.tag} (${unit.model}). Please review and confirm:`,
+        action_preview: {
+          id: `act-${Date.now().toString(36)}`,
+          intent: 'equipment_return',
+          category: unit.category,
+          record_identifier: unit.tag,
+          unit_id: unit.id,
+          unit_tag: unit.tag,
+          unit_model: unit.model,
+          target_status: 'Available',
+          title: `Return Equipment: ${unit.tag}`,
+          description: `Check in hardware from ${unit.custodian || 'current user'} and return to Available inventory.`,
+          changes: [
+            { field: 'Custodian', from: unit.custodian || 'In-Use', to: 'Unassigned' },
+            { field: 'Status', from: unit.status, to: 'Available' },
+          ],
+          requires_confirmation: true,
+          confirmation_token: `candela-token-${Date.now()}`,
+          expires_at: new Date(Date.now() + 300000).toISOString(),
+        },
+        status: 'success',
+        engine: 'candela-database-ai',
+      });
+    }
+
+    // 5. Action Preview: Status Update (Maintenance / Available)
     if (textLower.includes('maintenance') || (textLower.includes('status') && (textLower.includes('set') || textLower.includes('change') || textLower.includes('mark')))) {
       const unit = matchedItem || items[0];
       const targetStatus = textLower.includes('available') ? 'Available' : 'Under Maintenance';
@@ -362,6 +442,10 @@ export async function POST(req: NextRequest) {
           intent: 'status_update',
           category: unit.category,
           record_identifier: unit.tag,
+          unit_id: unit.id,
+          unit_tag: unit.tag,
+          unit_model: unit.model,
+          target_status: targetStatus,
           title: `Shift Status: ${unit.tag}`,
           description: `Update operational status to ${targetStatus}.`,
           changes: [
@@ -376,7 +460,7 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // 5. Action Preview: Radio Configuration Update
+    // 6. Action Preview: Radio Configuration Update
     if (textLower.includes('radio') || textLower.includes('chipset')) {
       const unit = (matchedItem && matchedItem.category === 'lanforge') ? matchedItem : (items.find(i => i.category === 'lanforge') || items[0]);
       let chipset = 'Intel BE200';
@@ -398,6 +482,11 @@ export async function POST(req: NextRequest) {
           intent: 'radio_configuration_update',
           category: 'lanforge',
           record_identifier: unit.tag,
+          unit_id: unit.id,
+          unit_tag: unit.tag,
+          unit_model: unit.model,
+          radio_chipset: chipset,
+          radio_quantity: quantity,
           title: `Update Radios: ${unit.tag}`,
           description: `Configure ${quantity}x ${chipset} radio interfaces on testbed.`,
           changes: [

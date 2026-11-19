@@ -36,7 +36,7 @@ export function AIAssistantPanel({
   onViewUnit,
   initialMessages = INITIAL_AI_MESSAGES,
 }: AIAssistantPanelProps) {
-  const { lanforges: ctxLanforges, metrics, assignEquipment } = useInventory();
+  const { lanforges: ctxLanforges, metrics, assignEquipment, refreshInventory } = useInventory();
   const lanforges = propLanforges || ctxLanforges;
   const { role: currentUserRole, user } = useAuth();
   const isAdmin = currentUserRole === 'admin';
@@ -156,6 +156,7 @@ export function AIAssistantPanel({
             status: 'pending' as const,
             confirmationToken: token,
             requiresConfirmation: ap.requires_confirmation,
+            rawAction: ap,
           };
         }
 
@@ -211,11 +212,12 @@ export function AIAssistantPanel({
           'Content-Type': 'application/json',
           'x-user-role': currentUserRole || 'admin',
           'x-user-name': user?.full_name || 'Admin Supervisor',
-          'x-user-id': user?.id || 'usr-admin-01',
+          'x-user-id': user?.id || '6a098c6e-86e4-4e1b-a77a-d7bdff7da475',
         },
         body: JSON.stringify({
           confirmation_token: token,
           action_id: preview.id,
+          action: preview.rawAction || preview,
         }),
       });
 
@@ -246,6 +248,13 @@ export function AIAssistantPanel({
           text: `✅ ${resData.message || 'Operation executed successfully.'}${resData.audit_log_id ? ` (Audit Ref: ${resData.audit_log_id})` : ''}`,
         };
         setMessages((prev) => [...prev, confirmReceipt]);
+
+        // Trigger live refresh so inventory table and metrics update immediately
+        try {
+          await refreshInventory();
+        } catch (e) {
+          console.warn('refreshInventory after confirm failed:', e);
+        }
 
         // Trigger callback if provided
         if (onApplyInventoryAction) {
@@ -329,38 +338,33 @@ export function AIAssistantPanel({
       {isOpen && (
         <div className={`flex flex-col h-full ${isExpanded ? 'w-[620px]' : 'w-[360px]'}`}>
           {/* Header */}
-          <div className="h-14 px-4 border-b border-[#E5EBE6] flex items-center justify-between bg-[#FFFFFF] flex-shrink-0">
-            <div className="flex items-center gap-2">
+          <div className="h-14 px-3.5 border-b border-[#E5EBE6] flex items-center justify-between bg-[#FFFFFF] flex-shrink-0">
+            <div className="flex items-center gap-2 min-w-0">
               <div className="w-7 h-7 rounded-md bg-[#247A51] text-white flex items-center justify-center flex-shrink-0">
                 <Sparkles className="w-4 h-4 text-[#F5F7F5]" />
               </div>
-              <div>
-                <div className="flex items-center gap-1.5">
-                  <span className="text-xs font-bold text-[#172A21] tracking-tight">
-                    Inventory Assistant
-                  </span>
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="text-sm font-bold text-[#172A21] tracking-tight whitespace-nowrap">
+                  AI Assistant
+                </span>
+                <span
+                  className={`text-[10px] font-medium px-2 py-0.5 rounded-full border inline-flex items-center gap-1 flex-shrink-0 ${
+                    engineStatus === 'connected'
+                      ? 'bg-[#EBF4EF] text-[#247A51] border-[#D5E9DE]'
+                      : 'bg-[#F1F5F9] text-[#475569] border-[#E2E8F0]'
+                  }`}
+                >
                   <span
-                    className={`text-[10px] font-semibold px-1.5 py-0.5 rounded border inline-flex items-center gap-1 ${
-                      engineStatus === 'connected'
-                        ? 'bg-[#EBF4EF] text-[#247A51] border-[#D5E9DE]'
-                        : 'bg-[#F1F5F9] text-[#475569] border-[#E2E8F0]'
+                    className={`w-1.5 h-1.5 rounded-full ${
+                      engineStatus === 'connected' ? 'bg-[#247A51]' : 'bg-[#64748B]'
                     }`}
-                  >
-                    <span
-                      className={`w-1.5 h-1.5 rounded-full ${
-                        engineStatus === 'connected' ? 'bg-[#247A51]' : 'bg-[#64748B]'
-                      }`}
-                    />
-                    {engineStatus === 'connected' ? 'AI Engine Connected' : 'Local Engine'}
-                  </span>
-                </div>
-                <p className="text-[11px] text-[#64748B]">
-                  Natural language operations across 4 categories
-                </p>
+                  />
+                  {engineStatus === 'connected' ? 'Online' : 'Local'}
+                </span>
               </div>
             </div>
 
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 flex-shrink-0">
               <button
                 type="button"
                 onClick={() => setIsExpanded(!isExpanded)}

@@ -174,6 +174,35 @@ export function DashboardLayout({ initialNav = 'dashboard' }: DashboardLayoutPro
     setArchiveTarget(null);
   };
 
+  const handleViewUnit = (tagOrId: string) => {
+    if (!tagOrId) return;
+    const q = tagOrId.toLowerCase().trim();
+    const lf = lanforges.find(l => l.lanforgeId.toLowerCase() === q || l.id === tagOrId);
+    if (lf) {
+      setDetailLANforge(lf);
+      setActiveNav('lanforges');
+      return;
+    }
+    const dt = desktops.find(d => d.deviceId.toLowerCase() === q || d.id === tagOrId);
+    if (dt) {
+      setDetailDesktop(dt);
+      setActiveNav('desktops');
+      return;
+    }
+    const mb = mobiles.find(m => m.deviceId.toLowerCase() === q || m.id === tagOrId);
+    if (mb) {
+      setDetailMobile(mb);
+      setActiveNav('mobiles');
+      return;
+    }
+    const ch = chambers.find(c => c.chamberId.toLowerCase() === q || c.id === tagOrId);
+    if (ch) {
+      setDetailChamber(ch);
+      setActiveNav('chambers');
+      return;
+    }
+  };
+
   // Quick Open Modal based on active navigation
   const handleOpenAddCurrentCategory = () => {
     if (activeNav === 'lanforges' || activeNav === 'dashboard') {
@@ -681,6 +710,7 @@ export function DashboardLayout({ initialNav = 'dashboard' }: DashboardLayoutPro
             isOpen={assistantOpen}
             onToggle={() => setAssistantOpen(!assistantOpen)}
             lanforges={lanforges}
+            onViewUnit={handleViewUnit}
           />
         </div>
       </div>

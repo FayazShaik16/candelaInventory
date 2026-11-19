@@ -177,6 +177,7 @@ export interface AIAssistantMessage {
     confirmationToken?: string;
     requiresConfirmation?: boolean;
     expiresAt?: string;
+    rawAction?: any;
   };
   queryResults?: QueryResultItem[];
 }

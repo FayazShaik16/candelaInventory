@@ -107,6 +107,8 @@ interface InventoryContextType {
   getEmployeeEquipment: (employeeId: string) => EmployeeEquipmentSummary;
 
   addActivityLog: (log: Omit<ActivityLog, 'id' | 'timestamp'>) => void;
+
+  refreshInventory: () => Promise<void>;
 }
 
 const InventoryContext = createContext<InventoryContextType | undefined>(undefined);
@@ -151,47 +153,49 @@ export function InventoryProvider({ children }: { children: React.ReactNode }) {
 
     // Fetch live inventory from database API
     let isMounted = true;
-    fetch('/api/inventory')
-      .then((res) => res.json())
-      .then((data) => {
-        if (isMounted && !data.error) {
-          if (Array.isArray(data.lanforges) && data.lanforges.length > 0) {
-            setLanforges(data.lanforges);
-            try { localStorage.setItem(STORAGE_KEYS.lanforges, JSON.stringify(data.lanforges)); } catch {}
-          }
-          if (Array.isArray(data.desktops) && data.desktops.length > 0) {
-            setDesktops(data.desktops);
-            try { localStorage.setItem(STORAGE_KEYS.desktops, JSON.stringify(data.desktops)); } catch {}
-          }
-          if (Array.isArray(data.mobiles) && data.mobiles.length > 0) {
-            setMobiles(data.mobiles);
-            try { localStorage.setItem(STORAGE_KEYS.mobiles, JSON.stringify(data.mobiles)); } catch {}
-          }
-          if (Array.isArray(data.chambers) && data.chambers.length > 0) {
-            setChambers(data.chambers);
-            try { localStorage.setItem(STORAGE_KEYS.chambers, JSON.stringify(data.chambers)); } catch {}
-          }
-          if (Array.isArray(data.assignments) && data.assignments.length > 0) {
-            setAssignments(data.assignments);
-            try { localStorage.setItem(STORAGE_KEYS.assignments, JSON.stringify(data.assignments)); } catch {}
-          }
-          if (Array.isArray(data.activityLogs) && data.activityLogs.length > 0) {
-            setActivityLogs(data.activityLogs);
-            try { localStorage.setItem(STORAGE_KEYS.activityLogs, JSON.stringify(data.activityLogs)); } catch {}
-          }
-        }
-      })
-      .catch((err) => {
-        console.warn('Could not fetch inventory from server, using local fallback:', err);
-      })
-      .finally(() => {
-        if (isMounted) setIsLoading(false);
-      });
+    refreshInventory().finally(() => {
+      if (isMounted) setIsLoading(false);
+    });
 
     return () => {
       isMounted = false;
     };
   }, []);
+
+  const refreshInventory = async () => {
+    try {
+      const res = await fetch('/api/inventory');
+      const data = await res.json();
+      if (!data.error) {
+        if (Array.isArray(data.lanforges) && data.lanforges.length > 0) {
+          setLanforges(data.lanforges);
+          try { localStorage.setItem(STORAGE_KEYS.lanforges, JSON.stringify(data.lanforges)); } catch {}
+        }
+        if (Array.isArray(data.desktops) && data.desktops.length > 0) {
+          setDesktops(data.desktops);
+          try { localStorage.setItem(STORAGE_KEYS.desktops, JSON.stringify(data.desktops)); } catch {}
+        }
+        if (Array.isArray(data.mobiles) && data.mobiles.length > 0) {
+          setMobiles(data.mobiles);
+          try { localStorage.setItem(STORAGE_KEYS.mobiles, JSON.stringify(data.mobiles)); } catch {}
+        }
+        if (Array.isArray(data.chambers) && data.chambers.length > 0) {
+          setChambers(data.chambers);
+          try { localStorage.setItem(STORAGE_KEYS.chambers, JSON.stringify(data.chambers)); } catch {}
+        }
+        if (Array.isArray(data.assignments) && data.assignments.length > 0) {
+          setAssignments(data.assignments);
+          try { localStorage.setItem(STORAGE_KEYS.assignments, JSON.stringify(data.assignments)); } catch {}
+        }
+        if (Array.isArray(data.activityLogs) && data.activityLogs.length > 0) {
+          setActivityLogs(data.activityLogs);
+          try { localStorage.setItem(STORAGE_KEYS.activityLogs, JSON.stringify(data.activityLogs)); } catch {}
+        }
+      }
+    } catch (err) {
+      console.warn('refreshInventory error:', err);
+    }
+  };
 
   // Sync state helpers
   const saveLanforges = (data: LANforgeItem[]) => {
@@ -1007,6 +1011,7 @@ export function InventoryProvider({ children }: { children: React.ReactNode }) {
         getEquipmentHistory,
         getEmployeeEquipment,
         addActivityLog,
+        refreshInventory,
       }}
     >
       {children}
