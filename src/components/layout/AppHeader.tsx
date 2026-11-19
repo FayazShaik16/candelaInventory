@@ -2,12 +2,8 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { 
-  Bell, 
   Menu, 
   ChevronRight, 
-  CheckCircle2, 
-  AlertTriangle, 
-  Clock, 
   Plus,
   ShieldCheck,
   LogOut,
@@ -41,16 +37,11 @@ export function AppHeader({
   const { user, role, logout } = useAuth();
   const isAdmin = role === 'admin';
 
-  const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
-  const notifRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
-        setNotificationsOpen(false);
-      }
       if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
         setProfileOpen(false);
       }
@@ -83,30 +74,6 @@ export function AppHeader({
         return 'Inventory Platform';
     }
   };
-
-  const notifications = [
-    {
-      id: 1,
-      title: 'Calibration Warning',
-      description: 'Candela RF-ATT-8x8 (CAN-ATT-0019) calibration due in 2 days.',
-      time: '15m ago',
-      type: 'warning',
-    },
-    {
-      id: 2,
-      title: 'Unit Assigned',
-      description: 'LANforge CT521B assigned to Fayaz Ahmed.',
-      time: '1h ago',
-      type: 'success',
-    },
-    {
-      id: 3,
-      title: 'Firmware Ready',
-      description: 'v5.5.0-beta2 build verified for CT523c series.',
-      time: '3h ago',
-      type: 'info',
-    },
-  ];
 
   const fullName = user?.full_name || 'Candela Employee';
   const initials = fullName
@@ -166,60 +133,6 @@ export function AppHeader({
             <span>Add Unit</span>
           </button>
         )}
-
-        {/* Notification Bell */}
-        <div className="relative" ref={notifRef}>
-          <button
-            type="button"
-            onClick={() => setNotificationsOpen(!notificationsOpen)}
-            className="relative p-1.5 rounded-md text-[#64748B] hover:text-[#172A21] hover:bg-[#F5F7F5] border border-[#E5EBE6] transition-colors"
-            title="Notifications"
-          >
-            <Bell className="w-4 h-4" />
-            <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-[#D97706]" />
-          </button>
-
-          {/* Notifications Dropdown */}
-          {notificationsOpen && (
-            <div className="absolute right-0 mt-1.5 w-80 bg-[#FFFFFF] border border-[#E5EBE6] rounded-md shadow-sm z-50 py-2">
-              <div className="px-3 pb-2 border-b border-[#E5EBE6] flex items-center justify-between">
-                <span className="text-xs font-semibold text-[#172A21]">Activity Notifications</span>
-                <span className="text-[10px] bg-[#EBF4EF] text-[#247A51] font-medium px-1.5 py-0.5 rounded">
-                  3 unread
-                </span>
-              </div>
-              <div className="divide-y divide-[#E5EBE6] max-h-64 overflow-y-auto">
-                {notifications.map((n) => (
-                  <div key={n.id} className="p-3 hover:bg-[#F5F7F5] transition-colors text-left cursor-pointer">
-                    <div className="flex items-start gap-2">
-                      {n.type === 'warning' ? (
-                        <AlertTriangle className="w-4 h-4 text-[#D97706] flex-shrink-0 mt-0.5" />
-                      ) : n.type === 'success' ? (
-                        <CheckCircle2 className="w-4 h-4 text-[#16A34A] flex-shrink-0 mt-0.5" />
-                      ) : (
-                        <Clock className="w-4 h-4 text-[#247A51] flex-shrink-0 mt-0.5" />
-                      )}
-                      <div className="min-w-0 flex-1">
-                        <p className="text-xs font-medium text-[#172A21]">{n.title}</p>
-                        <p className="text-[11px] text-[#64748B] mt-0.5">{n.description}</p>
-                        <p className="text-[10px] text-[#94A3B8] mt-1">{n.time}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className="pt-2 px-3 border-t border-[#E5EBE6] text-center">
-                <button
-                  type="button"
-                  onClick={() => setNotificationsOpen(false)}
-                  className="text-[11px] text-[#247A51] hover:underline font-medium"
-                >
-                  Mark all as reviewed
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
 
         {/* User Account Menu in Top Header */}
         <div className="relative border-l border-[#E5EBE6] pl-2 ml-1" ref={profileRef}>
