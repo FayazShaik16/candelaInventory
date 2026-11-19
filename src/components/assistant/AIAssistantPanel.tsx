@@ -89,8 +89,8 @@ export function AIAssistantPanel({
       query: 'Show all LANforge testbeds located in OPEL.',
     },
     {
-      label: 'Set DT-01 Under Maintenance',
-      query: 'Set DT-01 to Under Maintenance for diagnostic run.',
+      label: 'Set DT-DELL-02 Under Maintenance',
+      query: 'Set DT-DELL-02 to Under Maintenance for diagnostic run.',
     },
     {
       label: 'Sirisha Equipment',
@@ -119,7 +119,7 @@ export function AIAssistantPanel({
           'Content-Type': 'application/json',
           'x-user-role': currentUserRole || 'admin',
           'x-user-name': user?.full_name || 'Admin Supervisor',
-          'x-user-id': user?.id || 'usr-admin-01',
+          'x-user-id': user?.id || '6a098c6e-86e4-4e1b-a77a-d7bdff7da475',
         },
         body: JSON.stringify({
           message: text,
@@ -147,7 +147,7 @@ export function AIAssistantPanel({
             type: ap.intent || 'assignment',
             title: ap.title,
             unitAssetTag: ap.record_identifier,
-            model: ap.category ? ap.category.toUpperCase() : 'HARDWARE',
+            model: ap.unit_model || (ap.category ? ap.category.toUpperCase() : 'HARDWARE'),
             changes: (ap.changes || []).map((ch: any) => ({
               field: ch.field,
               from: ch.from_value ?? ch.from,
@@ -258,7 +258,8 @@ export function AIAssistantPanel({
 
         // Trigger callback if provided
         if (onApplyInventoryAction) {
-          onApplyInventoryAction(preview.unitAssetTag, { status: 'In-Use' });
+          const newStatus = (preview.rawAction?.target_status) || (preview.type?.includes('return') ? 'Available' : 'In-Use');
+          onApplyInventoryAction(preview.unitAssetTag, { status: newStatus });
         }
       } else {
         setMessages((prev) => [

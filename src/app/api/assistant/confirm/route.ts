@@ -61,11 +61,10 @@ export async function POST(req: NextRequest) {
     }
 
     const intent = (action?.intent || action?.type || '').toLowerCase();
-    console.log('[confirm] intent:', intent, '| action keys:', action ? Object.keys(action) : 'none');
     const rawCategory = (action?.category || 'lanforge').toLowerCase();
     let category = 
-      rawCategory.includes('desk') ? 'desktop' : 
-      rawCategory.includes('mob') ? 'mobile' : 
+      rawCategory.includes('desk') || rawCategory.includes('laptop') || rawCategory.includes('tablet') ? 'desktop' : 
+      rawCategory.includes('mob') || rawCategory.includes('phone') ? 'mobile' : 
       rawCategory.includes('cham') ? 'chamber' : 'lanforge';
 
     let unitTable = 

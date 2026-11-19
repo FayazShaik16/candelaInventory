@@ -134,7 +134,7 @@ async function getUnifiedInventory(): Promise<{
       if (chList && chList.length > 0) {
         chList.forEach((c: any) => {
           const tag = (c.chamber_id || '').toUpperCase();
-          const custodian = activeAsgnMap.get(tag) || (c.poc_id ? profMap.get(c.poc_id) : null) || (c.status === 'Available' ? 'Unassigned' : 'In-Use');
+          const custodian = activeAsgnMap.get(tag) || (c.used_by_id ? profMap.get(c.used_by_id) : (c.poc_id ? profMap.get(c.poc_id) : null)) || (c.status === 'Available' ? 'Unassigned' : 'In-Use');
           items.push({
             id: c.id,
             tag: c.chamber_id,
@@ -290,12 +290,27 @@ export async function POST(req: NextRequest) {
 
     // Identify mentioned employee from actual team directory
     let matchedProfile: { id: string; full_name: string; email: string; role: string } | null = null;
-    for (const p of profiles) {
-      const nameParts = p.full_name.toLowerCase().split(/\s+/);
-      const isMatch = nameParts.some(part => part.length >= 3 && textLower.includes(part));
-      if (isMatch) {
-        matchedProfile = p;
-        break;
+    
+    // Priority: Explicit target like "to Aarif" or "transfer to Sirisha"
+    const toMatch = textLower.match(/\b(?:to|assign to|transfer to)\s+([a-z]+)/i);
+    if (toMatch) {
+      const targetWord = toMatch[1].toLowerCase();
+      const explicitProfile = profiles.find(p => 
+        p.full_name.toLowerCase().includes(targetWord) || targetWord.includes(p.full_name.toLowerCase())
+      );
+      if (explicitProfile) {
+        matchedProfile = explicitProfile;
+      }
+    }
+
+    if (!matchedProfile) {
+      for (const p of profiles) {
+        const nameParts = p.full_name.toLowerCase().split(/\s+/);
+        const isMatch = nameParts.some(part => part.length >= 3 && textLower.includes(part));
+        if (isMatch) {
+          matchedProfile = p;
+          break;
+        }
       }
     }
 
@@ -330,8 +345,12 @@ export async function POST(req: NextRequest) {
             matchedItem = candidates.find(c => c.status === 'Available');
           }
 
+          if (!matchedItem && (textLower.includes('return') || textLower.includes('check in') || textLower.includes('release') || textLower.includes('unassign'))) {
+            matchedItem = candidates.find(c => c.status === 'In-Use');
+          }
+
           if (!matchedItem) {
-            matchedItem = candidates[0];
+            matchedItem = candidates.find(c => c.status === 'Available') || candidates[0];
           }
         }
       }
@@ -420,6 +439,7 @@ export async function POST(req: NextRequest) {
       textLower.includes('check in') ||
       textLower.includes('check-in') ||
       textLower.includes('free up') ||
+      textLower.startsWith('free ') ||
       textLower.includes('release') ||
       textLower.includes('unassign') ||
       (textLower.includes('make') && textLower.includes('available')) ||
@@ -579,8 +599,8 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // 7. Query Available Units — only as a pure query (no action verbs like make/set/mark/free/release/return/unassign)
-    const isActionVerb = ['make', 'set', 'mark', 'free up', 'release', 'unassign', 'return', 'check in'].some(v => textLower.includes(v));
+    // 7. Query Available Units — only as a pure query (no action verbs like make/set/mark/free/release/return/unassign/assign)
+    const isActionVerb = ['make', 'set', 'mark', 'free', 'release', 'unassign', 'return', 'check in', 'assign', 'transfer', 'allocate', 'reassign'].some(v => textLower.includes(v));
     if (!isActionVerb && (textLower.includes('available') || textLower.includes('ready for assignment') || textLower.includes('free') || textLower.includes('unassigned'))) {
       let filtered = items.filter(i => i.status === 'Available');
       if (textLower.includes('lanforge')) filtered = filtered.filter(i => i.category === 'lanforge');

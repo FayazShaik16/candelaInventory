@@ -59,7 +59,7 @@ export function ChatInput({
           onChange={(e) => setText(e.target.value)}
           onKeyDown={handleKeyDown}
           disabled={disabled || isLoading}
-          placeholder="Ask assistant or type commands (e.g., 'Assign CAN-521B-0042 to Fayaz')..."
+          placeholder="Ask assistant or type commands (e.g., 'Assign LF-OPEL-523C-03 to Aarif')..."
           className="w-full bg-transparent resize-none text-xs text-[#172A21] placeholder:text-[#94A3B8] focus:outline-none min-h-[32px] max-h-[120px] py-1"
         />
 

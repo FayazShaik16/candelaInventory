@@ -20,7 +20,7 @@ export async function GET() {
       supabase.from('desktops').select('*').order('s_no', { ascending: true }),
       supabase.from('mobiles').select('*').order('s_no', { ascending: true }),
       supabase.from('chambers').select('*').order('s_no', { ascending: true }),
-      supabase.from('inventory_assignments').select('*, profiles:employee_id(full_name, email)').order('assigned_at', { ascending: false }),
+      supabase.from('inventory_assignments').select('*, profiles:employee_id(full_name, email), assigner:assigned_by(full_name)').order('assigned_at', { ascending: false }),
       supabase.from('inventory_activity_logs').select('*, profiles:performed_by(full_name, role)').order('created_at', { ascending: false }),
     ]);
 
@@ -111,7 +111,7 @@ export async function GET() {
       employeeEmail: a.profiles?.email || '',
       assignedDate: a.assigned_at,
       returnDate: a.returned_at,
-      assignedBy: a.assigned_by || 'Admin Supervisor',
+      assignedBy: a.assigner?.full_name || 'Admin Supervisor',
       notes: a.notes || '',
       status: a.assignment_status,
     }));
