@@ -412,15 +412,28 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // 4. Action Preview: Equipment Return
-    if (textLower.includes('return') || textLower.includes('check in') || textLower.includes('check-in')) {
+    // 4. Action Preview: Equipment Return / Make Available / Release
+    // Detect: "return", "check in", "check-in", "make available", "mark as available",
+    //         "free up", "release", "unassign", "set available", "mark available"
+    const isReturnIntent =
+      textLower.includes('return') ||
+      textLower.includes('check in') ||
+      textLower.includes('check-in') ||
+      textLower.includes('free up') ||
+      textLower.includes('release') ||
+      textLower.includes('unassign') ||
+      (textLower.includes('make') && textLower.includes('available')) ||
+      (textLower.includes('mark') && textLower.includes('available')) ||
+      (textLower.includes('set') && textLower.includes('available'));
+
+    if (isReturnIntent) {
       const unit = matchedItem || items.find(i => i.status === 'In-Use') || items[0];
       return NextResponse.json({
         message_id: msgId,
         conversation_id: convId,
         sender: 'assistant',
         timestamp,
-        text: `Prepared equipment check-in preview for ${unit.tag} (${unit.model}). Please review and confirm:`,
+        text: `Prepared equipment release preview for **${unit.tag}** (${unit.model}). This will return it to Available inventory. Please confirm:`,
         action_preview: {
           id: `act-${Date.now().toString(36)}`,
           intent: 'equipment_return',
@@ -430,10 +443,10 @@ export async function POST(req: NextRequest) {
           unit_tag: unit.tag,
           unit_model: unit.model,
           target_status: 'Available',
-          title: `Return Equipment: ${unit.tag}`,
-          description: `Check in hardware from ${unit.custodian || 'current user'} and return to Available inventory.`,
+          title: `Release Equipment: ${unit.tag}`,
+          description: `Return hardware from ${unit.custodian || 'current custodian'} to Available inventory.`,
           changes: [
-            { field: 'Custodian', from: unit.custodian || 'In-Use', to: 'Unassigned' },
+            { field: 'Custodian', from: unit.custodian || 'Assigned', to: 'Unassigned' },
             { field: 'Status', from: unit.status, to: 'Available' },
           ],
           requires_confirmation: true,
@@ -445,8 +458,13 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // 5. Action Preview: Status Update (Maintenance / Available)
-    if (textLower.includes('maintenance') || (textLower.includes('status') && (textLower.includes('set') || textLower.includes('change') || textLower.includes('mark')))) {
+    // 5. Action Preview: Status Update (Under Maintenance only — Available handled above)
+    const isStatusUpdateIntent =
+      textLower.includes('maintenance') ||
+      textLower.includes('under maintenance') ||
+      (textLower.includes('status') && (textLower.includes('set') || textLower.includes('change') || textLower.includes('mark')));
+
+    if (isStatusUpdateIntent) {
       const unit = matchedItem || items[0];
       const targetStatus = textLower.includes('available') ? 'Available' : 'Under Maintenance';
 
@@ -561,8 +579,9 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // 7. Query Available Units
-    if (textLower.includes('available') || textLower.includes('ready for assignment') || textLower.includes('free') || textLower.includes('unassigned')) {
+    // 7. Query Available Units — only as a pure query (no action verbs like make/set/mark/free/release/return/unassign)
+    const isActionVerb = ['make', 'set', 'mark', 'free up', 'release', 'unassign', 'return', 'check in'].some(v => textLower.includes(v));
+    if (!isActionVerb && (textLower.includes('available') || textLower.includes('ready for assignment') || textLower.includes('free') || textLower.includes('unassigned'))) {
       let filtered = items.filter(i => i.status === 'Available');
       if (textLower.includes('lanforge')) filtered = filtered.filter(i => i.category === 'lanforge');
       else if (textLower.includes('desktop')) filtered = filtered.filter(i => i.category === 'desktop');
