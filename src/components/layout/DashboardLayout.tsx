@@ -7,7 +7,6 @@ import { MetricCard } from '../dashboard/MetricCard';
 import { ActivityList } from '../dashboard/ActivityList';
 import { AIAssistantPanel } from '../assistant/AIAssistantPanel';
 import { AssignmentsView } from '../views/AssignmentsView';
-import { ActivityView } from '../views/ActivityView';
 import { UsersView } from '../views/UsersView';
 import { SettingsView } from '../views/SettingsView';
 import { ProfileView } from '../views/ProfileView';
@@ -679,14 +678,6 @@ export function DashboardLayout({ initialNav = 'dashboard' }: DashboardLayoutPro
             {/* VIEW: ASSIGNMENTS */}
             {activeNav === 'assignments' && (
               <AssignmentsView />
-            )}
-
-            {/* VIEW: ACTIVITY */}
-            {activeNav === 'activity' && (
-              <ActivityView
-                activities={activities}
-                onSelectUnit={() => {}}
-              />
             )}
 
             {/* VIEW: USERS (Admin only) */}

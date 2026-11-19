@@ -8,7 +8,6 @@ import {
   Smartphone, 
   Box, 
   UserCheck, 
-  History, 
   Users, 
   Settings, 
   PanelLeftClose, 
@@ -27,7 +26,6 @@ export type NavItemKey =
   | 'mobiles' 
   | 'chambers' 
   | 'assignments' 
-  | 'activity' 
   | 'users' 
   | 'settings' 
   | 'profile';
@@ -94,12 +92,6 @@ export function AppSidebar({
       key: 'assignments' as NavItemKey,
       label: 'Assignments',
       icon: UserCheck,
-      badge: null,
-    },
-    {
-      key: 'activity' as NavItemKey,
-      label: 'Activity History',
-      icon: History,
       badge: null,
     },
     {

@@ -67,8 +67,6 @@ export function AppHeader({
         return 'RF & Anechoic Chambers';
       case 'assignments':
         return 'Unit Assignments';
-      case 'activity':
-        return 'Activity & Audit Log';
       case 'users':
         return 'User Management';
       case 'settings':
