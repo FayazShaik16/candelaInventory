@@ -129,13 +129,8 @@ export function AppSidebar({
 
       {/* Main Sidebar Container */}
       <aside
-        onClick={() => {
-          if (collapsed) {
-            onToggleCollapse();
-          }
-        }}
         className={`fixed inset-y-0 left-0 z-50 flex flex-col bg-[#173D30] border-r border-[#1E4637] transition-all duration-200 select-none ${
-          collapsed ? 'w-[68px] cursor-pointer hover:bg-[#1a4335]' : 'w-[240px]'
+          collapsed ? 'w-[68px]' : 'w-[240px]'
         } ${
           isMobileOpen
             ? 'translate-x-0'
@@ -168,11 +163,16 @@ export function AppSidebar({
 
           <button
             type="button"
-            onClick={onToggleCollapse}
-            className={`hidden lg:flex items-center justify-center w-7 h-7 rounded text-[#8EA79B] hover:text-[#E5EDE8] hover:bg-[#1E4637] transition-colors ${
-              collapsed ? 'absolute -right-3.5 top-3.5 bg-[#173D30] border border-[#1E4637] rounded-full shadow-sm text-xs w-7 h-7 z-50' : ''
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleCollapse();
+            }}
+            className={`hidden lg:flex items-center justify-center rounded transition-colors ${
+              collapsed
+                ? 'absolute -right-3.5 top-3.5 bg-[#173D30] hover:bg-[#247A51] border border-[#1E4637] text-white rounded-full shadow-md text-xs w-7 h-7 z-50 cursor-pointer'
+                : 'w-7 h-7 text-[#8EA79B] hover:text-[#E5EDE8] hover:bg-[#1E4637] cursor-pointer'
             }`}
-            title={collapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
+            title={collapsed ? 'Open Sidebar' : 'Collapse Sidebar'}
           >
             {collapsed ? <PanelLeft className="w-3.5 h-3.5" /> : <PanelLeftClose className="w-4 h-4" />}
           </button>

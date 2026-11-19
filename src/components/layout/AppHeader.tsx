@@ -12,7 +12,9 @@ import {
   ShieldCheck,
   LogOut,
   User,
-  ChevronDown
+  ChevronDown,
+  PanelLeft,
+  PanelLeftClose
 } from 'lucide-react';
 import { NavItemKey } from './AppSidebar';
 import { useAuth } from '@/context/AuthContext';
@@ -20,6 +22,8 @@ import { useAuth } from '@/context/AuthContext';
 interface AppHeaderProps {
   activeNav: NavItemKey;
   onOpenMobileSidebar: () => void;
+  onToggleSidebar?: () => void;
+  sidebarCollapsed?: boolean;
   assistantOpen?: boolean;
   onToggleAssistant?: () => void;
   searchQuery?: string;
@@ -30,6 +34,8 @@ interface AppHeaderProps {
 export function AppHeader({
   activeNav,
   onOpenMobileSidebar,
+  onToggleSidebar,
+  sidebarCollapsed = true,
   onOpenAddUnit,
 }: AppHeaderProps) {
   const { user, role, logout } = useAuth();
@@ -121,6 +127,22 @@ export function AppHeader({
         >
           <Menu className="w-5 h-5" />
         </button>
+
+        {/* Desktop Sidebar Toggle Button */}
+        {onToggleSidebar && (
+          <button
+            type="button"
+            onClick={onToggleSidebar}
+            className="hidden lg:flex p-1.5 -ml-1 text-[#64748B] hover:text-[#172A21] hover:bg-[#F5F7F5] rounded-md transition-colors"
+            title={sidebarCollapsed ? 'Open Sidebar' : 'Collapse Sidebar'}
+          >
+            {sidebarCollapsed ? (
+              <PanelLeft className="w-5 h-5 text-[#247A51]" />
+            ) : (
+              <PanelLeftClose className="w-5 h-5 text-[#64748B]" />
+            )}
+          </button>
+        )}
 
         <div className="flex items-center gap-2 text-sm text-[#1E293B]">
           <span className="font-semibold text-[#0B1310] hidden sm:inline">Candela Operations</span>

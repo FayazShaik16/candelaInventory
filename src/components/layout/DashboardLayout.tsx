@@ -236,6 +236,8 @@ export function DashboardLayout({ initialNav = 'dashboard' }: DashboardLayoutPro
         <AppHeader
           activeNav={activeNav}
           onOpenMobileSidebar={() => setMobileSidebarOpen(true)}
+          sidebarCollapsed={sidebarCollapsed}
+          onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)}
           onOpenAddUnit={handleOpenAddCurrentCategory}
         />
 
