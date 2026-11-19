@@ -70,6 +70,10 @@ const DEFAULT_DROPDOWN_VALUES: Record<DropdownCategory, Array<{ label: string; v
     { label: 'iPad', value: 'IPad', description: 'Apple iOS tablet device' },
   ],
   chamberTypes: [
+    { label: 'RF Isolation Chamber (Shielded Box)', value: 'RF Isolation Chamber', description: 'High-attenuation shielded RF box (>90 dB isolation)' },
+    { label: 'Over-The-Air Chamber (OTA)', value: 'Over-The-Air Chamber (OTA)', description: 'Multipath simulation and antenna array testing' },
+    { label: 'Reverberation Chamber', value: 'Reverberation Chamber', description: 'Isotropic statistical multipath test environment' },
+    { label: 'Anechoic Chamber', value: 'Anechoic Chamber', description: 'Free-space RF emission and antenna calibration' },
     { label: 'Large Chamber', value: 'Large', description: 'Full-size multipath walk-in isolation chamber' },
     { label: 'Medium Chamber', value: 'Medium', description: 'Standard benchtop RF isolation enclosure' },
     { label: 'HiaB (High-Isolation Box)', value: 'HiaB', description: 'High-density multi-radio RF shielded box' },
@@ -305,6 +309,14 @@ export function DropdownProvider({ children }: { children: React.ReactNode }) {
     }));
 
     setItems((prev) => [...prev.filter((i) => i.category !== category), ...defaults]);
+
+    defaults.forEach((item) => {
+      fetch('/api/dropdowns', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(item),
+      }).catch(console.error);
+    });
   };
 
   const resetAllToDefaults = () => {

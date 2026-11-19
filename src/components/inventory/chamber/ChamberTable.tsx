@@ -225,7 +225,7 @@ export function ChamberTable({
                     onClick={() => handleSort('type')}
                     className="flex items-center gap-1 hover:text-[#247A51]"
                   >
-                    <span>Chamber_Type</span>
+                    <span>Chamber Type</span>
                     <ArrowUpDown className="w-3 h-3 text-[#94A3B8]" />
                   </button>
                 </th>

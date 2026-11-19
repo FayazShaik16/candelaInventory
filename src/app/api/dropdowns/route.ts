@@ -51,10 +51,42 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'category, label and value are required' }, { status: 400 });
     }
 
+    // If updating an existing item by id
+    if (id) {
+      const { data: existing } = await supabase
+        .from('inventory_dropdown_settings')
+        .select('id')
+        .eq('id', id)
+        .maybeSingle();
+
+      if (existing) {
+        const { data: updated, error: updateError } = await supabase
+          .from('inventory_dropdown_settings')
+          .update({
+            category,
+            label: label.trim(),
+            value: value.trim(),
+            is_active: isActive !== undefined ? isActive : true,
+            is_system_default: isSystemDefault !== undefined ? isSystemDefault : false,
+            description: description?.trim() || null,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', id)
+          .select()
+          .single();
+
+        if (updateError) {
+          return NextResponse.json({ error: updateError.message }, { status: 500 });
+        }
+        return NextResponse.json({ success: true, item: updated });
+      }
+    }
+
+    // Insert new dropdown option
     const itemId = id || `dd-${category}-${Date.now()}`;
     const { data, error } = await supabase
       .from('inventory_dropdown_settings')
-      .upsert({
+      .insert({
         id: itemId,
         category,
         label: label.trim(),
@@ -62,8 +94,9 @@ export async function POST(req: NextRequest) {
         is_active: isActive !== undefined ? isActive : true,
         is_system_default: isSystemDefault !== undefined ? isSystemDefault : false,
         description: description?.trim() || null,
+        created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-      }, { onConflict: 'category,value' })
+      })
       .select()
       .single();
 

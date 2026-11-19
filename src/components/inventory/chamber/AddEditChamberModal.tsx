@@ -25,7 +25,7 @@ export function AddEditChamberModal({
   const projectOptions = getItemsByCategory('projects', true);
   const isEditing = Boolean(initialItem);
 
-  const [chamberType, setChamberType] = useState('Large');
+  const [chamberType, setChamberType] = useState('');
   const [chamberId, setChamberId] = useState('');
   const [usedById, setUsedById] = useState('');
   const [project, setProject] = useState('');
@@ -43,7 +43,8 @@ export function AddEditChamberModal({
       setStatus(initialItem.status);
       setErrorMessage('');
     } else {
-      setChamberType('Large');
+      const defaultVal = chamberTypeOptions.length > 0 ? chamberTypeOptions[0].value : 'Large';
+      setChamberType(defaultVal);
       setChamberId('CH-');
       setUsedById('');
       setProject('');
@@ -51,6 +52,15 @@ export function AddEditChamberModal({
       setErrorMessage('');
     }
   }, [initialItem, isOpen]);
+
+  // Keep chamberType synchronized when chamberTypeOptions loads or updates from Settings
+  useEffect(() => {
+    if (!isEditing && isOpen && chamberTypeOptions.length > 0) {
+      if (!chamberType || !chamberTypeOptions.some((c) => c.value === chamberType)) {
+        setChamberType(chamberTypeOptions[0].value);
+      }
+    }
+  }, [chamberTypeOptions, isEditing, isOpen]);
 
   if (!isOpen) return null;
 
@@ -132,17 +142,28 @@ export function AddEditChamberModal({
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-[#172A21] mb-1">Chamber Type *</label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-xs font-medium text-[#172A21]">Chamber Type *</label>
+              <span className="text-[10px] text-[#64748B]">Updated via Settings</span>
+            </div>
             <select
+              required
               value={chamberType}
               onChange={(e) => setChamberType(e.target.value)}
-              className="w-full px-2.5 py-1.5 bg-[#FFFFFF] border border-[#E5EBE6] rounded text-xs text-[#172A21] focus:outline-none focus:border-[#247A51]"
+              className="w-full px-2.5 py-1.5 bg-[#FFFFFF] border border-[#E5EBE6] rounded text-xs text-[#172A21] focus:outline-none focus:border-[#247A51] cursor-pointer"
             >
+              <option value="" disabled>-- Select Chamber Type --</option>
               {chamberTypeOptions.map((c) => (
                 <option key={c.id} value={c.value}>
-                  {c.label}
+                  {c.label !== c.value ? `${c.label} (${c.value})` : c.label}
                 </option>
               ))}
+              {/* Preserves custom chamber type when editing existing items */}
+              {initialItem?.chamberType && !chamberTypeOptions.some((c) => c.value === initialItem.chamberType) && (
+                <option key="existing-chamber-type" value={initialItem.chamberType}>
+                  {initialItem.chamberType}
+                </option>
+              )}
             </select>
           </div>
 
