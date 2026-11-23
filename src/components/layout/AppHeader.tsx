@@ -10,7 +10,8 @@ import {
   User,
   ChevronDown,
   PanelLeft,
-  PanelLeftClose
+  PanelLeftClose,
+  ArrowLeft
 } from 'lucide-react';
 import { NavItemKey } from './AppSidebar';
 import { useAuth } from '@/context/AuthContext';
@@ -25,6 +26,9 @@ interface AppHeaderProps {
   searchQuery?: string;
   onSearchChange?: (q: string) => void;
   onOpenAddUnit: () => void;
+  onBack?: () => void;
+  canGoBack?: boolean;
+  onNavigateHome?: () => void;
 }
 
 export function AppHeader({
@@ -33,6 +37,9 @@ export function AppHeader({
   onToggleSidebar,
   sidebarCollapsed = true,
   onOpenAddUnit,
+  onBack,
+  canGoBack = false,
+  onNavigateHome,
 }: AppHeaderProps) {
   const { user, role, logout } = useAuth();
   const isAdmin = role === 'admin';
@@ -111,8 +118,38 @@ export function AppHeader({
           </button>
         )}
 
+        {/* Page Back Button */}
+        {onBack && (
+          <button
+            type="button"
+            onClick={onBack}
+            disabled={!canGoBack}
+            className={`flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium border transition-colors ${
+              canGoBack
+                ? 'text-[#172A21] bg-[#FFFFFF] hover:bg-[#F5F7F5] border-[#E5EBE6] hover:border-[#CBD5E1] cursor-pointer shadow-none'
+                : 'text-[#94A3B8] bg-[#F8FAF9] border-[#E5EBE6] opacity-40 cursor-not-allowed'
+            }`}
+            title={canGoBack ? 'Go back to previous page' : 'Already on initial page'}
+            aria-label="Go back to previous page"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Back</span>
+          </button>
+        )}
+
         <div className="flex items-center gap-2 text-sm text-[#1E293B]">
-          <span className="font-semibold text-[#0B1310] hidden sm:inline">Candela Operations</span>
+          {onNavigateHome ? (
+            <button
+              type="button"
+              onClick={onNavigateHome}
+              className="font-semibold text-[#0B1310] hidden sm:inline hover:text-[#247A51] transition-colors cursor-pointer text-left"
+              title="Go to Operations Dashboard"
+            >
+              Candela Operations
+            </button>
+          ) : (
+            <span className="font-semibold text-[#0B1310] hidden sm:inline">Candela Operations</span>
+          )}
           <ChevronRight className="w-4 h-4 text-[#475569] hidden sm:inline" />
           <span className="font-bold text-[#0B1310] truncate">
             {getBreadcrumbTitle()}

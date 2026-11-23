@@ -78,17 +78,48 @@ export function DashboardLayout({ initialNav = 'dashboard' }: DashboardLayoutPro
     archiveChamber,
   } = useInventory();
 
-  // Navigation State
-  const [activeNav, setActiveNav] = useState<NavItemKey>(() => {
+  // Navigation State with History Stack
+  const [navHistory, setNavHistory] = useState<NavItemKey[]>([]);
+  const [activeNav, setActiveNavState] = useState<NavItemKey>(() => {
     if (initialNav === 'users' && role === 'employee') return 'dashboard';
     return initialNav;
   });
 
+  const setActiveNav = (newNav: NavItemKey) => {
+    if (newNav === activeNav) return;
+    setNavHistory((prev) => [...prev, activeNav]);
+    setActiveNavState(newNav);
+  };
+
+  const handleGoBack = () => {
+    if (navHistory.length > 0) {
+      const prevNav = navHistory[navHistory.length - 1];
+      setNavHistory((prev) => prev.slice(0, -1));
+      setActiveNavState(prevNav);
+    } else if (activeNav !== 'dashboard') {
+      setActiveNavState('dashboard');
+    } else if (typeof window !== 'undefined' && window.history.length > 1) {
+      window.history.back();
+    }
+  };
+
+  const canGoBack = navHistory.length > 0 || activeNav !== 'dashboard';
+
   useEffect(() => {
     if (!isAdmin && (activeNav === 'users' || activeNav === 'settings')) {
-      setActiveNav('dashboard');
+      setActiveNavState('dashboard');
     }
   }, [isAdmin, activeNav]);
+
+  useEffect(() => {
+    if (initialNav && initialNav !== activeNav) {
+      if (initialNav === 'users' && role === 'employee') {
+        setActiveNavState('dashboard');
+      } else {
+        setActiveNav(initialNav);
+      }
+    }
+  }, [initialNav]);
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -218,6 +249,9 @@ export function DashboardLayout({ initialNav = 'dashboard' }: DashboardLayoutPro
           sidebarCollapsed={sidebarCollapsed}
           onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)}
           onOpenAddUnit={handleOpenAddCurrentCategory}
+          onBack={handleGoBack}
+          canGoBack={canGoBack}
+          onNavigateHome={() => setActiveNav('dashboard')}
         />
 
         {/* Center Workspace & Right Assistant Column */}
