@@ -2054,37 +2054,4 @@ export const INITIAL_CHAMBERS: ChamberItem[] = [
   }
 ];
 
-export const INITIAL_ACTIVITY_LOGS: ActivityLog[] = [
-  {
-    "id": "2a9b9cee-abdb-4f52-86bb-212760f6c55d",
-    "timestamp": "2026-11-19T10:26:03.217679+00:00",
-    "unitAssetTag": "DATABASE",
-    "unitModel": "Production Inventory Database",
-    "inventoryCategory": "lanforge",
-    "inventoryId": null,
-    "action": "created",
-    "title": "Inventory Synchronized: created",
-    "description": "Imported complete hardware inventory from production Excel database (Nov 2026).",
-    "performedBy": "Admin Supervisor",
-    "user": {
-      "name": "Admin Supervisor",
-      "role": "Operations Lead"
-    }
-  },
-  {
-    "id": "e06c8f70-14fc-4f13-ab56-c04c3e498deb",
-    "timestamp": "2026-11-19T10:26:03.217679+00:00",
-    "unitAssetTag": "DATABASE",
-    "unitModel": "Production Inventory Database",
-    "inventoryCategory": "lanforge",
-    "inventoryId": null,
-    "action": "status_change",
-    "title": "Inventory Synchronized: status_change",
-    "description": "Synchronized live custody assignments for Netgear, SpaceX, Jio, and Chamberlain testbeds.",
-    "performedBy": "Admin Supervisor",
-    "user": {
-      "name": "Admin Supervisor",
-      "role": "Operations Lead"
-    }
-  }
-];
+export const INITIAL_ACTIVITY_LOGS: ActivityLog[] = [];

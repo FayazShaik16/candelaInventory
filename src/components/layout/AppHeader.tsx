@@ -63,10 +63,12 @@ export function AppHeader({
         return 'Operations Dashboard';
       case 'lanforges':
         return 'LANforges Testbeds';
+      case 'attenuators':
+        return 'RF Programmable Attenuators';
       case 'desktops':
         return 'Workstations & Desktops';
       case 'mobiles':
-        return 'Mobile Client Fleet';
+        return 'Real Client Devices Fleet';
       case 'chambers':
         return 'RF & Anechoic Chambers';
       case 'assignments':

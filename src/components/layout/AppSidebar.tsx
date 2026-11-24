@@ -15,7 +15,8 @@ import {
   CheckCircle2, 
   User,
   ClipboardList,
-  History
+  History,
+  Sliders
 } from 'lucide-react';
 import { UserProfileMenu } from './UserProfileMenu';
 import { useAuth } from '@/context/AuthContext';
@@ -24,6 +25,7 @@ import { useInventory } from '@/context/InventoryContext';
 export type NavItemKey = 
   | 'dashboard' 
   | 'lanforges' 
+  | 'attenuators'
   | 'desktops' 
   | 'mobiles' 
   | 'chambers' 
@@ -76,16 +78,14 @@ export function AppSidebar({
         : String(lanforges.filter((l) => l.pocId === user?.id && !l.isArchived).length),
     },
     {
-      key: 'desktops' as NavItemKey,
-      label: isAdmin ? 'Desktops' : 'My Desktops',
-      icon: Monitor,
-      badge: isAdmin 
-        ? String(metrics.totalDesktops) 
-        : String(desktops.filter((d) => d.pocId === user?.id && !d.isArchived).length),
+      key: 'attenuators' as NavItemKey,
+      label: 'Attenuators',
+      icon: Sliders,
+      badge: '24',
     },
     {
       key: 'mobiles' as NavItemKey,
-      label: isAdmin ? 'Mobiles' : 'My Mobiles',
+      label: isAdmin ? 'Real Devices' : 'My Real Devices',
       icon: Smartphone,
       badge: isAdmin 
         ? String(metrics.totalMobiles) 
@@ -98,6 +98,14 @@ export function AppSidebar({
       badge: isAdmin 
         ? String(metrics.totalChambers) 
         : String(chambers.filter((c) => c.usedById === user?.id && !c.isArchived).length),
+    },
+    {
+      key: 'desktops' as NavItemKey,
+      label: isAdmin ? 'Desktops' : 'My Desktops',
+      icon: Monitor,
+      badge: isAdmin 
+        ? String(metrics.totalDesktops) 
+        : String(desktops.filter((d) => d.pocId === user?.id && !d.isArchived).length),
     },
   ];
 

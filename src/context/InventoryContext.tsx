@@ -143,11 +143,8 @@ export function InventoryProvider({ children }: { children: React.ReactNode }) {
   const [mobiles, setMobiles] = useState<MobileItem[]>(INITIAL_MOBILES);
   const [chambers, setChambers] = useState<ChamberItem[]>(INITIAL_CHAMBERS);
   const [assignments, setAssignments] = useState<EquipmentAssignment[]>(INITIAL_ASSIGNMENTS);
-  const [activityLogs, setActivityLogs] = useState<ActivityLog[]>(() => [
-    ...HISTORICAL_ACTIVITY_LOGS,
-    ...INITIAL_ACTIVITY_LOGS
-  ]);
-  const [requests, setRequests] = useState<EquipmentRequest[]>(INITIAL_REQUESTS);
+  const [activityLogs, setActivityLogs] = useState<ActivityLog[]>([]);
+  const [requests, setRequests] = useState<EquipmentRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Initialize data from local storage, seeds, and live database API
@@ -169,27 +166,27 @@ export function InventoryProvider({ children }: { children: React.ReactNode }) {
       if (storedLogs) {
         try {
           const parsed = JSON.parse(storedLogs);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            const existingIds = new Set(parsed.map((l: any) => l.id));
-            const merged = [
-              ...parsed,
-              ...HISTORICAL_ACTIVITY_LOGS.filter((h) => !existingIds.has(h.id)),
-            ].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-            setActivityLogs(merged);
-          } else {
-            setActivityLogs(HISTORICAL_ACTIVITY_LOGS);
+          if (Array.isArray(parsed)) {
+            const realLogs = parsed.filter((l: any) =>
+              l.id &&
+              !l.id.startsWith('ACT-HIST-') &&
+              l.id !== '2a9b9cee-abdb-4f52-86bb-212760f6c55d' &&
+              l.id !== 'e06c8f70-14fc-4f13-ab56-c04c3e498deb'
+            );
+            setActivityLogs(realLogs);
+            try { localStorage.setItem(STORAGE_KEYS.activityLogs, JSON.stringify(realLogs)); } catch { }
           }
-        } catch {
-          setActivityLogs(HISTORICAL_ACTIVITY_LOGS);
-        }
-      } else {
-        setActivityLogs(HISTORICAL_ACTIVITY_LOGS);
+        } catch { }
       }
       if (storedReqs) {
-        const parsed = JSON.parse(storedReqs);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          setRequests(parsed);
-        }
+        try {
+          const parsed = JSON.parse(storedReqs);
+          if (Array.isArray(parsed)) {
+            const realRequests = parsed.filter((r: any) => r.id && !r.id.startsWith('REQ-2026-'));
+            setRequests(realRequests);
+            try { localStorage.setItem(STORAGE_KEYS.requests, JSON.stringify(realRequests)); } catch { }
+          }
+        } catch { }
       }
     } catch { }
 
@@ -229,14 +226,15 @@ export function InventoryProvider({ children }: { children: React.ReactNode }) {
           setAssignments(data.assignments);
           try { localStorage.setItem(STORAGE_KEYS.assignments, JSON.stringify(data.assignments)); } catch { }
         }
-        if (Array.isArray(data.activityLogs) && data.activityLogs.length > 0) {
-          const existingIds = new Set(data.activityLogs.map((l: any) => l.id));
-          const merged = [
-            ...data.activityLogs,
-            ...HISTORICAL_ACTIVITY_LOGS.filter((h) => !existingIds.has(h.id)),
-          ].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-          setActivityLogs(merged);
-          try { localStorage.setItem(STORAGE_KEYS.activityLogs, JSON.stringify(merged)); } catch { }
+        if (Array.isArray(data.activityLogs)) {
+          const realLogs = data.activityLogs.filter((l: any) =>
+            l.id &&
+            !l.id.startsWith('ACT-HIST-') &&
+            l.id !== '2a9b9cee-abdb-4f52-86bb-212760f6c55d' &&
+            l.id !== 'e06c8f70-14fc-4f13-ab56-c04c3e498deb'
+          );
+          setActivityLogs(realLogs);
+          try { localStorage.setItem(STORAGE_KEYS.activityLogs, JSON.stringify(realLogs)); } catch { }
         }
       }
 
@@ -244,9 +242,10 @@ export function InventoryProvider({ children }: { children: React.ReactNode }) {
       try {
         const reqRes = await fetch('/api/requests');
         const reqData = await reqRes.json();
-        if (Array.isArray(reqData.requests) && reqData.requests.length > 0) {
-          setRequests(reqData.requests);
-          try { localStorage.setItem(STORAGE_KEYS.requests, JSON.stringify(reqData.requests)); } catch { }
+        if (Array.isArray(reqData.requests)) {
+          const realRequests = reqData.requests.filter((r: any) => r.id && !r.id.startsWith('REQ-2026-'));
+          setRequests(realRequests);
+          try { localStorage.setItem(STORAGE_KEYS.requests, JSON.stringify(realRequests)); } catch { }
         }
       } catch (err) {
         console.warn('refreshRequests error:', err);

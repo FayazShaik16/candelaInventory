@@ -40,12 +40,17 @@ html {
 body {
   background-color: var(--bg-main);
   color: #0B1310;
-  font-family: var(--font-inter), 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: var(--font-outfit), 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
   font-weight: 400;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+}
+
+/* Universal single font: Outfit across all headings, tables, forms, and elements */
+*, *::before, *::after, button, input, select, textarea, table, th, td, h1, h2, h3, h4, h5, h6, p, span, div, a {
+  font-family: var(--font-outfit), 'Outfit', sans-serif !important;
 }
 
 /* Custom crisp scrollbar for enterprise data-dense layout */
@@ -145,9 +150,11 @@ tbody td {
   font-size: 13.5px !important;
 }
 
-/* Monospace tags and numbers */
+/* Monospace tags and numbers - unified with Outfit tabular figures */
 .font-mono {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
+  font-family: var(--font-outfit), 'Outfit', sans-serif !important;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" on, "zero" on;
   font-weight: 600;
   letter-spacing: -0.01em;
 }
