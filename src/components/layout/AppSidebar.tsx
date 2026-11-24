@@ -14,7 +14,8 @@ import {
   PanelLeft, 
   CheckCircle2, 
   User,
-  ClipboardList
+  ClipboardList,
+  History
 } from 'lucide-react';
 import { UserProfileMenu } from './UserProfileMenu';
 import { useAuth } from '@/context/AuthContext';
@@ -28,6 +29,7 @@ export type NavItemKey =
   | 'chambers' 
   | 'assignments' 
   | 'requests'
+  | 'logs'
   | 'users' 
   | 'settings' 
   | 'profile';
@@ -112,6 +114,13 @@ export function AppSidebar({
       label: 'Assignments',
       icon: UserCheck,
       badge: null,
+    },
+    {
+      key: 'logs' as NavItemKey,
+      label: 'Activity Logs',
+      icon: History,
+      badge: null,
+      adminOnly: true,
     },
     {
       key: 'users' as NavItemKey,

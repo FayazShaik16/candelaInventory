@@ -73,6 +73,8 @@ export function AppHeader({
         return 'Unit Assignments';
       case 'requests':
         return isAdmin ? 'Resource Requests Management' : 'My Resource Requests';
+      case 'logs':
+        return 'Activity & Transaction Logs';
       case 'users':
         return 'User Management';
       case 'settings':

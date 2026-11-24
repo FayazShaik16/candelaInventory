@@ -1,11 +1,11 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
-import { 
-  LANforgeItem, 
-  DesktopItem, 
-  MobileItem, 
-  ChamberItem, 
+import {
+  LANforgeItem,
+  DesktopItem,
+  MobileItem,
+  ChamberItem,
   EquipmentAssignment,
   ActivityLog,
   EquipmentCategory,
@@ -18,15 +18,16 @@ import {
   RequestStatus,
   ResourceCategory
 } from '@/types/inventory';
-import { 
-  INITIAL_LANFORGES, 
-  INITIAL_DESKTOPS, 
-  INITIAL_MOBILES, 
-  INITIAL_CHAMBERS, 
+import {
+  INITIAL_LANFORGES,
+  INITIAL_DESKTOPS,
+  INITIAL_MOBILES,
+  INITIAL_CHAMBERS,
   INITIAL_ASSIGNMENTS,
-  INITIAL_ACTIVITY_LOGS 
+  INITIAL_ACTIVITY_LOGS
 } from '@/data/inventorySeed';
 import { INITIAL_REQUESTS } from '@/data/mockRequests';
+import { HISTORICAL_ACTIVITY_LOGS } from '@/data/mockActivityLogs';
 import { useAuth } from './AuthContext';
 import { createClient } from '@/lib/supabase/client';
 
@@ -79,16 +80,16 @@ interface InventoryContextType {
 
   // Phase 4 Workflows: Assignment, Return & Atomic Transfer
   assignEquipment: (
-    category: EquipmentCategory, 
-    equipmentId: string, 
-    employeeId: string, 
+    category: EquipmentCategory,
+    equipmentId: string,
+    employeeId: string,
     notes?: string,
     assignedDate?: string
   ) => Promise<{ success: boolean; error?: string }>;
 
   returnEquipment: (
-    category: EquipmentCategory, 
-    equipmentId: string, 
+    category: EquipmentCategory,
+    equipmentId: string,
     notes?: string,
     returnDate?: string,
     markUnderMaintenance?: boolean
@@ -142,7 +143,10 @@ export function InventoryProvider({ children }: { children: React.ReactNode }) {
   const [mobiles, setMobiles] = useState<MobileItem[]>(INITIAL_MOBILES);
   const [chambers, setChambers] = useState<ChamberItem[]>(INITIAL_CHAMBERS);
   const [assignments, setAssignments] = useState<EquipmentAssignment[]>(INITIAL_ASSIGNMENTS);
-  const [activityLogs, setActivityLogs] = useState<ActivityLog[]>(INITIAL_ACTIVITY_LOGS);
+  const [activityLogs, setActivityLogs] = useState<ActivityLog[]>(() => [
+    ...HISTORICAL_ACTIVITY_LOGS,
+    ...INITIAL_ACTIVITY_LOGS
+  ]);
   const [requests, setRequests] = useState<EquipmentRequest[]>(INITIAL_REQUESTS);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -162,14 +166,32 @@ export function InventoryProvider({ children }: { children: React.ReactNode }) {
       if (storedMb) setMobiles(JSON.parse(storedMb));
       if (storedCh) setChambers(JSON.parse(storedCh));
       if (storedAsgn) setAssignments(JSON.parse(storedAsgn));
-      if (storedLogs) setActivityLogs(JSON.parse(storedLogs));
+      if (storedLogs) {
+        try {
+          const parsed = JSON.parse(storedLogs);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            const existingIds = new Set(parsed.map((l: any) => l.id));
+            const merged = [
+              ...parsed,
+              ...HISTORICAL_ACTIVITY_LOGS.filter((h) => !existingIds.has(h.id)),
+            ].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+            setActivityLogs(merged);
+          } else {
+            setActivityLogs(HISTORICAL_ACTIVITY_LOGS);
+          }
+        } catch {
+          setActivityLogs(HISTORICAL_ACTIVITY_LOGS);
+        }
+      } else {
+        setActivityLogs(HISTORICAL_ACTIVITY_LOGS);
+      }
       if (storedReqs) {
         const parsed = JSON.parse(storedReqs);
         if (Array.isArray(parsed) && parsed.length > 0) {
           setRequests(parsed);
         }
       }
-    } catch {}
+    } catch { }
 
     // Fetch live inventory from database API
     let isMounted = true;
@@ -189,27 +211,32 @@ export function InventoryProvider({ children }: { children: React.ReactNode }) {
       if (!data.error) {
         if (Array.isArray(data.lanforges) && data.lanforges.length > 0) {
           setLanforges(data.lanforges);
-          try { localStorage.setItem(STORAGE_KEYS.lanforges, JSON.stringify(data.lanforges)); } catch {}
+          try { localStorage.setItem(STORAGE_KEYS.lanforges, JSON.stringify(data.lanforges)); } catch { }
         }
         if (Array.isArray(data.desktops) && data.desktops.length > 0) {
           setDesktops(data.desktops);
-          try { localStorage.setItem(STORAGE_KEYS.desktops, JSON.stringify(data.desktops)); } catch {}
+          try { localStorage.setItem(STORAGE_KEYS.desktops, JSON.stringify(data.desktops)); } catch { }
         }
         if (Array.isArray(data.mobiles) && data.mobiles.length > 0) {
           setMobiles(data.mobiles);
-          try { localStorage.setItem(STORAGE_KEYS.mobiles, JSON.stringify(data.mobiles)); } catch {}
+          try { localStorage.setItem(STORAGE_KEYS.mobiles, JSON.stringify(data.mobiles)); } catch { }
         }
         if (Array.isArray(data.chambers) && data.chambers.length > 0) {
           setChambers(data.chambers);
-          try { localStorage.setItem(STORAGE_KEYS.chambers, JSON.stringify(data.chambers)); } catch {}
+          try { localStorage.setItem(STORAGE_KEYS.chambers, JSON.stringify(data.chambers)); } catch { }
         }
         if (Array.isArray(data.assignments) && data.assignments.length > 0) {
           setAssignments(data.assignments);
-          try { localStorage.setItem(STORAGE_KEYS.assignments, JSON.stringify(data.assignments)); } catch {}
+          try { localStorage.setItem(STORAGE_KEYS.assignments, JSON.stringify(data.assignments)); } catch { }
         }
         if (Array.isArray(data.activityLogs) && data.activityLogs.length > 0) {
-          setActivityLogs(data.activityLogs);
-          try { localStorage.setItem(STORAGE_KEYS.activityLogs, JSON.stringify(data.activityLogs)); } catch {}
+          const existingIds = new Set(data.activityLogs.map((l: any) => l.id));
+          const merged = [
+            ...data.activityLogs,
+            ...HISTORICAL_ACTIVITY_LOGS.filter((h) => !existingIds.has(h.id)),
+          ].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+          setActivityLogs(merged);
+          try { localStorage.setItem(STORAGE_KEYS.activityLogs, JSON.stringify(merged)); } catch { }
         }
       }
 
@@ -219,7 +246,7 @@ export function InventoryProvider({ children }: { children: React.ReactNode }) {
         const reqData = await reqRes.json();
         if (Array.isArray(reqData.requests) && reqData.requests.length > 0) {
           setRequests(reqData.requests);
-          try { localStorage.setItem(STORAGE_KEYS.requests, JSON.stringify(reqData.requests)); } catch {}
+          try { localStorage.setItem(STORAGE_KEYS.requests, JSON.stringify(reqData.requests)); } catch { }
         }
       } catch (err) {
         console.warn('refreshRequests error:', err);
@@ -232,31 +259,31 @@ export function InventoryProvider({ children }: { children: React.ReactNode }) {
   // Sync state helpers
   const saveLanforges = (data: LANforgeItem[]) => {
     setLanforges(data);
-    try { localStorage.setItem(STORAGE_KEYS.lanforges, JSON.stringify(data)); } catch {}
+    try { localStorage.setItem(STORAGE_KEYS.lanforges, JSON.stringify(data)); } catch { }
   };
   const saveDesktops = (data: DesktopItem[]) => {
     setDesktops(data);
-    try { localStorage.setItem(STORAGE_KEYS.desktops, JSON.stringify(data)); } catch {}
+    try { localStorage.setItem(STORAGE_KEYS.desktops, JSON.stringify(data)); } catch { }
   };
   const saveMobiles = (data: MobileItem[]) => {
     setMobiles(data);
-    try { localStorage.setItem(STORAGE_KEYS.mobiles, JSON.stringify(data)); } catch {}
+    try { localStorage.setItem(STORAGE_KEYS.mobiles, JSON.stringify(data)); } catch { }
   };
   const saveChambers = (data: ChamberItem[]) => {
     setChambers(data);
-    try { localStorage.setItem(STORAGE_KEYS.chambers, JSON.stringify(data)); } catch {}
+    try { localStorage.setItem(STORAGE_KEYS.chambers, JSON.stringify(data)); } catch { }
   };
   const saveAssignments = (data: EquipmentAssignment[]) => {
     setAssignments(data);
-    try { localStorage.setItem(STORAGE_KEYS.assignments, JSON.stringify(data)); } catch {}
+    try { localStorage.setItem(STORAGE_KEYS.assignments, JSON.stringify(data)); } catch { }
   };
   const saveActivityLogs = (data: ActivityLog[]) => {
     setActivityLogs(data);
-    try { localStorage.setItem(STORAGE_KEYS.activityLogs, JSON.stringify(data)); } catch {}
+    try { localStorage.setItem(STORAGE_KEYS.activityLogs, JSON.stringify(data)); } catch { }
   };
   const saveRequests = (data: EquipmentRequest[]) => {
     setRequests(data);
-    try { localStorage.setItem(STORAGE_KEYS.requests, JSON.stringify(data)); } catch {}
+    try { localStorage.setItem(STORAGE_KEYS.requests, JSON.stringify(data)); } catch { }
   };
 
   // Append-only audit logger
@@ -266,8 +293,11 @@ export function InventoryProvider({ children }: { children: React.ReactNode }) {
       timestamp: new Date().toISOString(),
       ...entry,
     };
-    const updated = [newLog, ...activityLogs];
-    saveActivityLogs(updated);
+    setActivityLogs((prev) => {
+      const updated = [newLog, ...prev];
+      try { localStorage.setItem(STORAGE_KEYS.activityLogs, JSON.stringify(updated)); } catch { }
+      return updated;
+    });
   };
 
   // Helper to get employee name from ID
@@ -1061,7 +1091,7 @@ export function InventoryProvider({ children }: { children: React.ReactNode }) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ action: 'create', request: newReq }),
         });
-      } catch {}
+      } catch { }
 
       return { success: true, request: newReq };
     } catch (err: any) {
@@ -1144,7 +1174,7 @@ export function InventoryProvider({ children }: { children: React.ReactNode }) {
           reviewedBy: user?.full_name || 'Admin',
         }),
       });
-    } catch {}
+    } catch { }
 
     return { success: true };
   };
@@ -1223,7 +1253,7 @@ export function InventoryProvider({ children }: { children: React.ReactNode }) {
           reviewedBy: user?.full_name || 'Admin',
         }),
       });
-    } catch {}
+    } catch { }
 
     return { success: true };
   };
@@ -1280,7 +1310,7 @@ export function InventoryProvider({ children }: { children: React.ReactNode }) {
           reviewedBy: user?.full_name || 'Admin',
         }),
       });
-    } catch {}
+    } catch { }
 
     return { success: true };
   };
