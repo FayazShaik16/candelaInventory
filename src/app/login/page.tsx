@@ -72,7 +72,7 @@ function LoginForm() {
 
   const setDemoCredentials = (demoEmail: string) => {
     setEmail(demoEmail);
-    setPassword('Candela#2026!');
+    setPassword('CandelaPassword2026!');
     setFormError('');
   };
 
@@ -232,17 +232,22 @@ function LoginForm() {
 
           {/* Quick Demo Credentials Pill for Reviewers */}
           <div className="pt-2 border-t border-[#E5EBE6] space-y-2">
-            <span className="text-[10px] font-semibold text-[#64748B] uppercase tracking-wider block">
-              Quick Test Sign In:
-            </span>
-            <div className="grid grid-cols-2 gap-2 text-[11px]">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-semibold text-[#64748B] uppercase tracking-wider block">
+                Quick Test Sign In:
+              </span>
+              <span className="text-[10px] text-[#64748B]">
+                Password: <strong className="text-[#172A21]">CandelaPassword2026!</strong>
+              </span>
+            </div>
+            <div className="grid grid-cols-3 gap-2 text-[11px]">
               <button
                 type="button"
                 onClick={() => setDemoCredentials('admin@candelatech.com')}
                 className="p-2 rounded bg-[#F5F7F5] hover:bg-[#EBF4EF] border border-[#E5EBE6] text-left transition-colors"
               >
-                <div className="font-semibold text-[#172A21]">Admin Role</div>
-                <div className="text-[10px] text-[#247A51]">admin@candelatech.com</div>
+                <div className="font-semibold text-[#172A21] truncate">Admin</div>
+                <div className="text-[10px] text-[#247A51] truncate">admin@...</div>
               </button>
 
               <button
@@ -250,8 +255,17 @@ function LoginForm() {
                 onClick={() => setDemoCredentials('fayaz.ahmed@candelatech.com')}
                 className="p-2 rounded bg-[#F5F7F5] hover:bg-[#EBF4EF] border border-[#E5EBE6] text-left transition-colors"
               >
-                <div className="font-semibold text-[#172A21]">Employee Role</div>
-                <div className="text-[10px] text-[#0284C7]">fayaz.ahmed@candelatech.com</div>
+                <div className="font-semibold text-[#172A21] truncate">Employee (Fayaz)</div>
+                <div className="text-[10px] text-[#0284C7] truncate">fayaz.ahmed@...</div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setDemoCredentials('sirisha@candelatech.com')}
+                className="p-2 rounded bg-[#F5F7F5] hover:bg-[#EBF4EF] border border-[#E5EBE6] text-left transition-colors"
+              >
+                <div className="font-semibold text-[#172A21] truncate">Employee (Sirisha)</div>
+                <div className="text-[10px] text-[#0284C7] truncate">sirisha@...</div>
               </button>
             </div>
           </div>

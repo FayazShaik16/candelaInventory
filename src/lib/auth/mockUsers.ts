@@ -12,6 +12,16 @@ export const INITIAL_MOCK_PROFILES: UserProfile[] = [
     created_by: null,
   },
   {
+    id: '593f3a6e-157a-4bea-b31d-6f8058167c12',
+    full_name: 'Fayaz Ahmed',
+    email: 'fayaz.ahmed@candelatech.com',
+    role: 'employee',
+    account_status: 'active',
+    created_at: '2026-11-19T10:22:40.677Z',
+    updated_at: '2026-11-19T10:22:40.677Z',
+    created_by: null,
+  },
+  {
     id: 'db40b5f4-cf6c-4434-9464-af5ce25fd6af',
     full_name: 'Sirisha',
     email: 'sirisha@candelatech.com',
