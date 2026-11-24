@@ -387,7 +387,7 @@ export function LandingPageView({ onNavigate, onRequestResource }: LandingPageVi
             className="group relative aspect-video w-full rounded-2xl lg:rounded-3xl border border-[#E5EBE6] hover:border-[#247A51] overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1 bg-[#173D30]"
           >
             <img
-              src="/Images/chambers.webp"
+              src="/Images/chambers.webp?v=2"
               alt="RF Isolation & Anechoic Chambers"
               className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
