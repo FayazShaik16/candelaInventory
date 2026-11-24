@@ -9,6 +9,9 @@ import { AssignmentsView } from '../views/AssignmentsView';
 import { UsersView } from '../views/UsersView';
 import { SettingsView } from '../views/SettingsView';
 import { ProfileView } from '../views/ProfileView';
+import { RequestsView } from '../views/RequestsView';
+import { EmployeeDashboardView } from '../dashboard/EmployeeDashboardView';
+import { RequestResourceModal } from '../requests/RequestResourceModal';
 
 // Phase 3 Inventory Components
 import { LANforgeTable } from '../inventory/lanforge/LANforgeTable';
@@ -152,6 +155,26 @@ export function DashboardLayout({ initialNav = 'dashboard' }: DashboardLayoutPro
     tag: string;
   } | null>(null);
 
+  // Resource Request Modal State
+  const [isResourceRequestOpen, setIsResourceRequestOpen] = useState(false);
+
+  // Filter hardware for custody isolation (Employees only see hardware with them)
+  const userLANforges = React.useMemo(() => {
+    return isAdmin ? lanforges : lanforges.filter((l) => l.pocId === user?.id && !l.isArchived);
+  }, [isAdmin, lanforges, user?.id]);
+
+  const userDesktops = React.useMemo(() => {
+    return isAdmin ? desktops : desktops.filter((d) => d.pocId === user?.id && !d.isArchived);
+  }, [isAdmin, desktops, user?.id]);
+
+  const userMobiles = React.useMemo(() => {
+    return isAdmin ? mobiles : mobiles.filter((m) => m.pocId === user?.id && !m.isArchived);
+  }, [isAdmin, mobiles, user?.id]);
+
+  const userChambers = React.useMemo(() => {
+    return isAdmin ? chambers : chambers.filter((c) => c.usedById === user?.id && !c.isArchived);
+  }, [isAdmin, chambers, user?.id]);
+
   // Current formatted date initialized safely for SSR
   const [currentDateString, setCurrentDateString] = useState('Wednesday, November 18, 2026');
 
@@ -213,6 +236,10 @@ export function DashboardLayout({ initialNav = 'dashboard' }: DashboardLayoutPro
 
   // Quick Open Modal based on active navigation
   const handleOpenAddCurrentCategory = () => {
+    if (!isAdmin) {
+      setIsResourceRequestOpen(true);
+      return;
+    }
     if (activeNav === 'lanforges' || activeNav === 'dashboard') {
       setIsAddLANforgeOpen(true);
     } else if (activeNav === 'desktops') {
@@ -261,7 +288,13 @@ export function DashboardLayout({ initialNav = 'dashboard' }: DashboardLayoutPro
             
             {/* VIEW: DASHBOARD */}
             {activeNav === 'dashboard' && (
-              <>
+              !isAdmin ? (
+                <EmployeeDashboardView
+                  onViewUnit={handleViewUnit}
+                  onNavigateToRequests={() => setActiveNav('requests')}
+                />
+              ) : (
+                <>
                 {/* 1. Welcome Section */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1">
                   <div>
@@ -542,6 +575,7 @@ export function DashboardLayout({ initialNav = 'dashboard' }: DashboardLayoutPro
                   </div>
                 </div>
               </>
+              )
             )}
 
             {/* VIEW: LANFORGES */}
@@ -550,13 +584,15 @@ export function DashboardLayout({ initialNav = 'dashboard' }: DashboardLayoutPro
                 <div className="flex items-center justify-between pb-1">
                   <div>
                     <h1 className="text-xl font-bold tracking-tight text-[#172A21]">
-                      LANforge Testbed Management
+                      {isAdmin ? 'LANforge Testbed Management' : 'My Assigned LANforges'}
                     </h1>
                     <p className="text-xs text-[#64748B]">
-                      Manage multi-station Wi-Fi traffic generators, radio hardware configurations, and IP assignments.
+                      {isAdmin 
+                        ? 'Manage multi-station Wi-Fi traffic generators, radio hardware configurations, and IP assignments.'
+                        : 'LANforge testbeds currently assigned to your project work. Need another unit? Click Request Hardware.'}
                     </p>
                   </div>
-                  {isAdmin && (
+                  {isAdmin ? (
                     <button
                       type="button"
                       onClick={() => setIsAddLANforgeOpen(true)}
@@ -565,11 +601,40 @@ export function DashboardLayout({ initialNav = 'dashboard' }: DashboardLayoutPro
                       <Plus className="w-3.5 h-3.5" />
                       <span>Register LANforge</span>
                     </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setIsResourceRequestOpen(true)}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-[#247A51] hover:bg-[#1D6342] rounded transition-colors"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Request LANforge</span>
+                    </button>
                   )}
                 </div>
 
+                {!isAdmin && (
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-[#EBF4EF] border border-[#C2DCD0] text-xs text-[#173D30]">
+                    <div className="flex items-center gap-2">
+                      <Radio className="w-4 h-4 text-[#247A51]" />
+                      <span>
+                        {userLANforges.length === 0 
+                          ? 'You currently do not have any LANforge testbeds assigned in your custody.' 
+                          : `Displaying ${userLANforges.length} LANforge testbed${userLANforges.length === 1 ? '' : 's'} currently in your custody.`}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setIsResourceRequestOpen(true)}
+                      className="px-2.5 py-1 text-xs font-semibold text-white bg-[#247A51] hover:bg-[#1D6342] rounded transition-colors"
+                    >
+                      + Request Hardware
+                    </button>
+                  </div>
+                )}
+
                 <LANforgeTable
-                  data={lanforges}
+                  data={userLANforges}
                   onView={(item) => setDetailLANforge(item)}
                   onEdit={(item) => setEditLANforge(item)}
                   onArchive={(item) => setArchiveTarget({ category: 'lanforge', id: item.id, tag: item.lanforgeId })}
@@ -585,13 +650,15 @@ export function DashboardLayout({ initialNav = 'dashboard' }: DashboardLayoutPro
                 <div className="flex items-center justify-between pb-1">
                   <div>
                     <h1 className="text-xl font-bold tracking-tight text-[#172A21]">
-                      Workstation & Desktop Registry
+                      {isAdmin ? 'Workstation & Desktop Registry' : 'My Assigned Workstations & PCs'}
                     </h1>
                     <p className="text-xs text-[#64748B]">
-                      Inventory of engineering workstations, benchtop controllers, and lab PC units.
+                      {isAdmin 
+                        ? 'Inventory of engineering workstations, benchtop controllers, and lab PC units.'
+                        : 'Workstations and controllers currently assigned to you for lab execution.'}
                     </p>
                   </div>
-                  {isAdmin && (
+                  {isAdmin ? (
                     <button
                       type="button"
                       onClick={() => setIsAddDesktopOpen(true)}
@@ -600,11 +667,40 @@ export function DashboardLayout({ initialNav = 'dashboard' }: DashboardLayoutPro
                       <Plus className="w-3.5 h-3.5" />
                       <span>Register Desktop</span>
                     </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setIsResourceRequestOpen(true)}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-[#247A51] hover:bg-[#1D6342] rounded transition-colors"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Request Desktop</span>
+                    </button>
                   )}
                 </div>
 
+                {!isAdmin && (
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-[#EBF4EF] border border-[#C2DCD0] text-xs text-[#173D30]">
+                    <div className="flex items-center gap-2">
+                      <Monitor className="w-4 h-4 text-[#247A51]" />
+                      <span>
+                        {userDesktops.length === 0
+                          ? 'You currently do not have any workstations assigned in your custody.'
+                          : `Displaying ${userDesktops.length} workstation unit${userDesktops.length === 1 ? '' : 's'} assigned to your custody.`}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setIsResourceRequestOpen(true)}
+                      className="px-2.5 py-1 text-xs font-semibold text-white bg-[#247A51] hover:bg-[#1D6342] rounded transition-colors"
+                    >
+                      + Request Desktop
+                    </button>
+                  </div>
+                )}
+
                 <DesktopTable
-                  data={desktops}
+                  data={userDesktops}
                   onView={(item) => setDetailDesktop(item)}
                   onEdit={(item) => setEditDesktop(item)}
                   onArchive={(item) => setArchiveTarget({ category: 'desktop', id: item.id, tag: item.deviceId })}
@@ -620,13 +716,15 @@ export function DashboardLayout({ initialNav = 'dashboard' }: DashboardLayoutPro
                 <div className="flex items-center justify-between pb-1">
                   <div>
                     <h1 className="text-xl font-bold tracking-tight text-[#172A21]">
-                      Mobile Client Fleet
+                      {isAdmin ? 'Mobile Client Fleet' : 'My Assigned Mobile Clients'}
                     </h1>
                     <p className="text-xs text-[#64748B]">
-                      Client mobile devices for automated Wi-Fi interoperability and throughput validation.
+                      {isAdmin 
+                        ? 'Client mobile devices for automated Wi-Fi interoperability and throughput validation.'
+                        : 'Real test devices and smartphones currently in your custody for test campaigns.'}
                     </p>
                   </div>
-                  {isAdmin && (
+                  {isAdmin ? (
                     <button
                       type="button"
                       onClick={() => setIsAddMobileOpen(true)}
@@ -635,11 +733,40 @@ export function DashboardLayout({ initialNav = 'dashboard' }: DashboardLayoutPro
                       <Plus className="w-3.5 h-3.5" />
                       <span>Register Mobile</span>
                     </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setIsResourceRequestOpen(true)}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-[#247A51] hover:bg-[#1D6342] rounded transition-colors"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Request Mobile</span>
+                    </button>
                   )}
                 </div>
 
+                {!isAdmin && (
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-[#EBF4EF] border border-[#C2DCD0] text-xs text-[#173D30]">
+                    <div className="flex items-center gap-2">
+                      <Smartphone className="w-4 h-4 text-[#247A51]" />
+                      <span>
+                        {userMobiles.length === 0
+                          ? 'You currently do not have any mobile client devices assigned in your custody.'
+                          : `Displaying ${userMobiles.length} client device${userMobiles.length === 1 ? '' : 's'} assigned to your custody.`}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setIsResourceRequestOpen(true)}
+                      className="px-2.5 py-1 text-xs font-semibold text-white bg-[#247A51] hover:bg-[#1D6342] rounded transition-colors"
+                    >
+                      + Request Device
+                    </button>
+                  </div>
+                )}
+
                 <MobileTable
-                  data={mobiles}
+                  data={userMobiles}
                   onView={(item) => setDetailMobile(item)}
                   onEdit={(item) => setEditMobile(item)}
                   onArchive={(item) => setArchiveTarget({ category: 'mobile', id: item.id, tag: item.deviceId })}
@@ -655,13 +782,15 @@ export function DashboardLayout({ initialNav = 'dashboard' }: DashboardLayoutPro
                 <div className="flex items-center justify-between pb-1">
                   <div>
                     <h1 className="text-xl font-bold tracking-tight text-[#172A21]">
-                      RF & Anechoic Chamber Registry
+                      {isAdmin ? 'RF & Anechoic Chamber Registry' : 'My Chamber Bookings'}
                     </h1>
                     <p className="text-xs text-[#64748B]">
-                      Manage isolation chambers, reverberation chambers, and active RF testing enclosures.
+                      {isAdmin 
+                        ? 'Manage isolation chambers, reverberation chambers, and active RF testing enclosures.'
+                        : 'RF isolation and test chambers currently allocated for your campaigns.'}
                     </p>
                   </div>
-                  {isAdmin && (
+                  {isAdmin ? (
                     <button
                       type="button"
                       onClick={() => setIsAddChamberOpen(true)}
@@ -670,11 +799,40 @@ export function DashboardLayout({ initialNav = 'dashboard' }: DashboardLayoutPro
                       <Plus className="w-3.5 h-3.5" />
                       <span>Register Chamber</span>
                     </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setIsResourceRequestOpen(true)}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-[#247A51] hover:bg-[#1D6342] rounded transition-colors"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Request Chamber</span>
+                    </button>
                   )}
                 </div>
 
+                {!isAdmin && (
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-[#EBF4EF] border border-[#C2DCD0] text-xs text-[#173D30]">
+                    <div className="flex items-center gap-2">
+                      <Box className="w-4 h-4 text-[#247A51]" />
+                      <span>
+                        {userChambers.length === 0
+                          ? 'You currently do not have any chambers allocated in your custody.'
+                          : `Displaying ${userChambers.length} RF chamber${userChambers.length === 1 ? '' : 's'} allocated to your custody.`}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setIsResourceRequestOpen(true)}
+                      className="px-2.5 py-1 text-xs font-semibold text-white bg-[#247A51] hover:bg-[#1D6342] rounded transition-colors"
+                    >
+                      + Request Chamber
+                    </button>
+                  </div>
+                )}
+
                 <ChamberTable
-                  data={chambers}
+                  data={userChambers}
                   onView={(item) => setDetailChamber(item)}
                   onEdit={(item) => setEditChamber(item)}
                   onArchive={(item) => setArchiveTarget({ category: 'chamber', id: item.id, tag: item.chamberId })}
@@ -682,6 +840,11 @@ export function DashboardLayout({ initialNav = 'dashboard' }: DashboardLayoutPro
                   isAdmin={isAdmin}
                 />
               </div>
+            )}
+
+            {/* VIEW: REQUESTS (Admin & Employee) */}
+            {activeNav === 'requests' && (
+              <RequestsView />
             )}
 
             {/* VIEW: ASSIGNMENTS */}
@@ -872,6 +1035,11 @@ export function DashboardLayout({ initialNav = 'dashboard' }: DashboardLayoutPro
           </div>
         </div>
       )}
+      {/* Employee Global Resource Request Modal */}
+      <RequestResourceModal
+        isOpen={isResourceRequestOpen}
+        onClose={() => setIsResourceRequestOpen(false)}
+      />
     </div>
   );
 }

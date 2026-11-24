@@ -13,7 +13,8 @@ import {
   PanelLeftClose, 
   PanelLeft, 
   CheckCircle2, 
-  User
+  User,
+  ClipboardList
 } from 'lucide-react';
 import { UserProfileMenu } from './UserProfileMenu';
 import { useAuth } from '@/context/AuthContext';
@@ -26,6 +27,7 @@ export type NavItemKey =
   | 'mobiles' 
   | 'chambers' 
   | 'assignments' 
+  | 'requests'
   | 'users' 
   | 'settings' 
   | 'profile';
@@ -47,9 +49,11 @@ export function AppSidebar({
   isMobileOpen = false,
   onCloseMobile,
 }: AppSidebarProps) {
-  const { role } = useAuth();
-  const { metrics } = useInventory();
+  const { user, role } = useAuth();
+  const { metrics, requests, lanforges, desktops, mobiles, chambers } = useInventory();
   const isAdmin = role === 'admin';
+
+  const pendingRequestsCount = requests.filter((r) => r.status === 'pending').length;
 
   const mainNavItems = [
     {
@@ -63,31 +67,46 @@ export function AppSidebar({
   const categoryNavItems = [
     {
       key: 'lanforges' as NavItemKey,
-      label: 'LANforges',
+      label: isAdmin ? 'LANforges' : 'My LANforges',
       icon: Radio,
-      badge: String(metrics.totalLANforges),
+      badge: isAdmin 
+        ? String(metrics.totalLANforges) 
+        : String(lanforges.filter((l) => l.pocId === user?.id && !l.isArchived).length),
     },
     {
       key: 'desktops' as NavItemKey,
-      label: 'Desktops',
+      label: isAdmin ? 'Desktops' : 'My Desktops',
       icon: Monitor,
-      badge: String(metrics.totalDesktops),
+      badge: isAdmin 
+        ? String(metrics.totalDesktops) 
+        : String(desktops.filter((d) => d.pocId === user?.id && !d.isArchived).length),
     },
     {
       key: 'mobiles' as NavItemKey,
-      label: 'Mobiles',
+      label: isAdmin ? 'Mobiles' : 'My Mobiles',
       icon: Smartphone,
-      badge: String(metrics.totalMobiles),
+      badge: isAdmin 
+        ? String(metrics.totalMobiles) 
+        : String(mobiles.filter((m) => m.pocId === user?.id && !m.isArchived).length),
     },
     {
       key: 'chambers' as NavItemKey,
-      label: 'Chambers',
+      label: isAdmin ? 'Chambers' : 'My Chambers',
       icon: Box,
-      badge: String(metrics.totalChambers),
+      badge: isAdmin 
+        ? String(metrics.totalChambers) 
+        : String(chambers.filter((c) => c.usedById === user?.id && !c.isArchived).length),
     },
   ];
 
   const operationsNavItems = [
+    {
+      key: 'requests' as NavItemKey,
+      label: isAdmin ? 'Requests' : 'My Requests',
+      icon: ClipboardList,
+      badge: isAdmin && pendingRequestsCount > 0 ? `${pendingRequestsCount} Pending` : null,
+      isHighlight: isAdmin && pendingRequestsCount > 0,
+    },
     {
       key: 'assignments' as NavItemKey,
       label: 'Assignments',
@@ -161,21 +180,7 @@ export function AppSidebar({
             </div>
           )}
 
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              onToggleCollapse();
-            }}
-            className={`hidden lg:flex items-center justify-center rounded transition-colors ${
-              collapsed
-                ? 'absolute -right-3.5 top-3.5 bg-[#173D30] hover:bg-[#247A51] border border-[#1E4637] text-white rounded-full shadow-md text-xs w-7 h-7 z-50 cursor-pointer'
-                : 'w-7 h-7 text-[#8EA79B] hover:text-[#E5EDE8] hover:bg-[#1E4637] cursor-pointer'
-            }`}
-            title={collapsed ? 'Open Sidebar' : 'Collapse Sidebar'}
-          >
-            {collapsed ? <PanelLeft className="w-3.5 h-3.5" /> : <PanelLeftClose className="w-4 h-4" />}
-          </button>
+
         </div>
 
         {/* Navigation Items */}
@@ -266,7 +271,13 @@ export function AppSidebar({
                   <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-[#FFFFFF]' : 'text-[#A3BFB2]'}`} />
                   {!collapsed && <span className="flex-1 truncate">{item.label}</span>}
                   {!collapsed && item.badge && (
-                    <span className="text-[11px] px-2 py-0.5 rounded font-mono font-medium bg-[#1E4637] text-[#C2D6CC] border border-[#28513F]">
+                    <span 
+                      className={`text-[11px] px-2 py-0.5 rounded font-mono font-medium ${
+                        item.isHighlight 
+                          ? 'bg-[#EAB308]/20 text-[#FEF08A] border border-[#CA8A04]/40 font-bold animate-pulse'
+                          : 'bg-[#1E4637] text-[#C2D6CC] border border-[#28513F]'
+                      }`}
+                    >
                       {item.badge}
                     </span>
                   )}

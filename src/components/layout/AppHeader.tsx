@@ -71,6 +71,8 @@ export function AppHeader({
         return 'RF & Anechoic Chambers';
       case 'assignments':
         return 'Unit Assignments';
+      case 'requests':
+        return isAdmin ? 'Resource Requests Management' : 'My Resource Requests';
       case 'users':
         return 'User Management';
       case 'settings':

@@ -13,7 +13,10 @@ import {
   EmployeeEquipmentSummary,
   GlobalInventoryStatus,
   LANforgeLocation,
-  LANforgeRadio
+  LANforgeRadio,
+  EquipmentRequest,
+  RequestStatus,
+  ResourceCategory
 } from '@/types/inventory';
 import { 
   INITIAL_LANFORGES, 
@@ -23,6 +26,7 @@ import {
   INITIAL_ASSIGNMENTS,
   INITIAL_ACTIVITY_LOGS 
 } from '@/data/inventorySeed';
+import { INITIAL_REQUESTS } from '@/data/mockRequests';
 import { useAuth } from './AuthContext';
 import { createClient } from '@/lib/supabase/client';
 
@@ -109,6 +113,13 @@ interface InventoryContextType {
   addActivityLog: (log: Omit<ActivityLog, 'id' | 'timestamp'>) => void;
 
   refreshInventory: () => Promise<void>;
+
+  // Resource Requests Workflow
+  requests: EquipmentRequest[];
+  createRequest: (data: Omit<EquipmentRequest, 'id' | 'createdAt' | 'updatedAt' | 'status'>) => Promise<{ success: boolean; error?: string; request?: EquipmentRequest }>;
+  approveAndAssignRequest: (requestId: string, category: EquipmentCategory, equipmentId: string, notes?: string) => Promise<{ success: boolean; error?: string }>;
+  transferRequest: (requestId: string, category: EquipmentCategory, equipmentId: string, notes?: string) => Promise<{ success: boolean; error?: string }>;
+  rejectRequest: (requestId: string, adminNotes: string) => Promise<{ success: boolean; error?: string }>;
 }
 
 const InventoryContext = createContext<InventoryContextType | undefined>(undefined);
@@ -120,6 +131,7 @@ const STORAGE_KEYS = {
   chambers: 'candela_db_chambers',
   assignments: 'candela_db_assignments',
   activityLogs: 'candela_db_activity_logs',
+  requests: 'candela_db_equipment_requests',
 };
 
 export function InventoryProvider({ children }: { children: React.ReactNode }) {
@@ -131,6 +143,7 @@ export function InventoryProvider({ children }: { children: React.ReactNode }) {
   const [chambers, setChambers] = useState<ChamberItem[]>(INITIAL_CHAMBERS);
   const [assignments, setAssignments] = useState<EquipmentAssignment[]>(INITIAL_ASSIGNMENTS);
   const [activityLogs, setActivityLogs] = useState<ActivityLog[]>(INITIAL_ACTIVITY_LOGS);
+  const [requests, setRequests] = useState<EquipmentRequest[]>(INITIAL_REQUESTS);
   const [isLoading, setIsLoading] = useState(true);
 
   // Initialize data from local storage, seeds, and live database API
@@ -142,6 +155,7 @@ export function InventoryProvider({ children }: { children: React.ReactNode }) {
       const storedCh = localStorage.getItem(STORAGE_KEYS.chambers);
       const storedAsgn = localStorage.getItem(STORAGE_KEYS.assignments);
       const storedLogs = localStorage.getItem(STORAGE_KEYS.activityLogs);
+      const storedReqs = localStorage.getItem(STORAGE_KEYS.requests);
 
       if (storedLf) setLanforges(JSON.parse(storedLf));
       if (storedDt) setDesktops(JSON.parse(storedDt));
@@ -149,6 +163,12 @@ export function InventoryProvider({ children }: { children: React.ReactNode }) {
       if (storedCh) setChambers(JSON.parse(storedCh));
       if (storedAsgn) setAssignments(JSON.parse(storedAsgn));
       if (storedLogs) setActivityLogs(JSON.parse(storedLogs));
+      if (storedReqs) {
+        const parsed = JSON.parse(storedReqs);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setRequests(parsed);
+        }
+      }
     } catch {}
 
     // Fetch live inventory from database API
@@ -192,6 +212,18 @@ export function InventoryProvider({ children }: { children: React.ReactNode }) {
           try { localStorage.setItem(STORAGE_KEYS.activityLogs, JSON.stringify(data.activityLogs)); } catch {}
         }
       }
+
+      // Fetch live equipment requests
+      try {
+        const reqRes = await fetch('/api/requests');
+        const reqData = await reqRes.json();
+        if (Array.isArray(reqData.requests) && reqData.requests.length > 0) {
+          setRequests(reqData.requests);
+          try { localStorage.setItem(STORAGE_KEYS.requests, JSON.stringify(reqData.requests)); } catch {}
+        }
+      } catch (err) {
+        console.warn('refreshRequests error:', err);
+      }
     } catch (err) {
       console.warn('refreshInventory error:', err);
     }
@@ -221,6 +253,10 @@ export function InventoryProvider({ children }: { children: React.ReactNode }) {
   const saveActivityLogs = (data: ActivityLog[]) => {
     setActivityLogs(data);
     try { localStorage.setItem(STORAGE_KEYS.activityLogs, JSON.stringify(data)); } catch {}
+  };
+  const saveRequests = (data: EquipmentRequest[]) => {
+    setRequests(data);
+    try { localStorage.setItem(STORAGE_KEYS.requests, JSON.stringify(data)); } catch {}
   };
 
   // Append-only audit logger
@@ -982,6 +1018,273 @@ export function InventoryProvider({ children }: { children: React.ReactNode }) {
     };
   };
 
+  // -------------------------------------------------------------
+  // RESOURCE REQUESTS WORKFLOW HELPERS
+  // -------------------------------------------------------------
+  const createRequest = async (
+    data: Omit<EquipmentRequest, 'id' | 'createdAt' | 'updatedAt' | 'status'>
+  ): Promise<{ success: boolean; error?: string; request?: EquipmentRequest }> => {
+    try {
+      const now = new Date().toISOString();
+      const newReq: EquipmentRequest = {
+        ...data,
+        id: `REQ-${Date.now().toString(36).toUpperCase()}-${Math.floor(Math.random() * 1000)}`,
+        status: 'pending',
+        createdAt: now,
+        updatedAt: now,
+      };
+
+      const updated = [newReq, ...requests];
+      saveRequests(updated);
+
+      addActivityLog({
+        unitAssetTag: newReq.preferredAssetTag || newReq.resourceCategory.toUpperCase(),
+        unitModel: newReq.resourceLabel,
+        inventoryCategory: (newReq.resourceCategory === 'attenuator' || newReq.resourceCategory === 'accessory') ? undefined : newReq.resourceCategory as EquipmentCategory,
+        inventoryId: newReq.preferredAssetId || null,
+        action: 'created',
+        title: `Resource Requested: ${newReq.resourceLabel}`,
+        description: `${newReq.employeeName} requested ${newReq.resourceLabel} (${newReq.priority}) for project ${newReq.project}. Duration: ${newReq.duration}`,
+        performedBy: newReq.employeeName,
+        employeeId: newReq.employeeId,
+        employeeName: newReq.employeeName,
+        user: {
+          name: newReq.employeeName,
+          role: 'Engineer',
+        },
+      });
+
+      // Background persistence
+      try {
+        await fetch('/api/requests', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'create', request: newReq }),
+        });
+      } catch {}
+
+      return { success: true, request: newReq };
+    } catch (err: any) {
+      return { success: false, error: err.message || 'Failed to submit request' };
+    }
+  };
+
+  const approveAndAssignRequest = async (
+    requestId: string,
+    category: EquipmentCategory,
+    equipmentId: string,
+    notes?: string
+  ): Promise<{ success: boolean; error?: string }> => {
+    const req = requests.find((r) => r.id === requestId);
+    if (!req) return { success: false, error: 'Request not found' };
+
+    // 1. Assign the equipment to the requester
+    const assignRes = await assignEquipment(
+      category,
+      equipmentId,
+      req.employeeId,
+      req.project,
+      notes || `Allocated per request ${requestId}: ${req.purpose}`
+    );
+
+    if (!assignRes.success) {
+      return { success: false, error: assignRes.error || 'Failed to assign equipment' };
+    }
+
+    // 2. Find assigned asset details
+    let assignedTag = equipmentId;
+    if (category === 'lanforge') {
+      const item = lanforges.find((l) => l.id === equipmentId);
+      if (item) assignedTag = item.lanforgeId;
+    } else if (category === 'desktop') {
+      const item = desktops.find((d) => d.id === equipmentId);
+      if (item) assignedTag = item.deviceId;
+    } else if (category === 'mobile') {
+      const item = mobiles.find((m) => m.id === equipmentId);
+      if (item) assignedTag = item.deviceId;
+    } else if (category === 'chamber') {
+      const item = chambers.find((c) => c.id === equipmentId);
+      if (item) assignedTag = item.chamberId;
+    }
+
+    // 3. Update request status to 'approved'
+    const now = new Date().toISOString();
+    const updated = requests.map((r) => {
+      if (r.id === requestId) {
+        return {
+          ...r,
+          status: 'approved' as const,
+          assignedAssetId: equipmentId,
+          assignedCategory: category,
+          assignedAssetTag: assignedTag,
+          adminNotes: notes || `Approved & allocated ${assignedTag}`,
+          reviewedBy: user?.full_name || 'Admin',
+          reviewedAt: now,
+          updatedAt: now,
+        };
+      }
+      return r;
+    });
+
+    saveRequests(updated);
+
+    // Background persistence
+    try {
+      await fetch('/api/requests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'updateStatus',
+          requestId,
+          status: 'approved',
+          assignedAssetId: equipmentId,
+          assignedCategory: category,
+          assignedAssetTag: assignedTag,
+          adminNotes: notes,
+          reviewedBy: user?.full_name || 'Admin',
+        }),
+      });
+    } catch {}
+
+    return { success: true };
+  };
+
+  const transferRequest = async (
+    requestId: string,
+    category: EquipmentCategory,
+    equipmentId: string,
+    notes?: string
+  ): Promise<{ success: boolean; error?: string }> => {
+    const req = requests.find((r) => r.id === requestId);
+    if (!req) return { success: false, error: 'Request not found' };
+
+    // 1. Transfer the equipment to the requester
+    const transferRes = await transferEquipment(
+      category,
+      equipmentId,
+      req.employeeId,
+      notes || `Transferred per request ${requestId}: ${req.purpose}`
+    );
+
+    if (!transferRes.success) {
+      return { success: false, error: transferRes.error || 'Failed to transfer equipment' };
+    }
+
+    // 2. Find assigned asset details
+    let assignedTag = equipmentId;
+    if (category === 'lanforge') {
+      const item = lanforges.find((l) => l.id === equipmentId);
+      if (item) assignedTag = item.lanforgeId;
+    } else if (category === 'desktop') {
+      const item = desktops.find((d) => d.id === equipmentId);
+      if (item) assignedTag = item.deviceId;
+    } else if (category === 'mobile') {
+      const item = mobiles.find((m) => m.id === equipmentId);
+      if (item) assignedTag = item.deviceId;
+    } else if (category === 'chamber') {
+      const item = chambers.find((c) => c.id === equipmentId);
+      if (item) assignedTag = item.chamberId;
+    }
+
+    // 3. Update request status to 'approved'
+    const now = new Date().toISOString();
+    const updated = requests.map((r) => {
+      if (r.id === requestId) {
+        return {
+          ...r,
+          status: 'approved' as const,
+          assignedAssetId: equipmentId,
+          assignedCategory: category,
+          assignedAssetTag: assignedTag,
+          adminNotes: notes || `Transferred & allocated ${assignedTag}`,
+          reviewedBy: user?.full_name || 'Admin',
+          reviewedAt: now,
+          updatedAt: now,
+        };
+      }
+      return r;
+    });
+
+    saveRequests(updated);
+
+    // Background persistence
+    try {
+      await fetch('/api/requests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'updateStatus',
+          requestId,
+          status: 'approved',
+          assignedAssetId: equipmentId,
+          assignedCategory: category,
+          assignedAssetTag: assignedTag,
+          adminNotes: notes || `Transferred & allocated ${assignedTag}`,
+          reviewedBy: user?.full_name || 'Admin',
+        }),
+      });
+    } catch {}
+
+    return { success: true };
+  };
+
+  const rejectRequest = async (
+    requestId: string,
+    adminNotes: string
+  ): Promise<{ success: boolean; error?: string }> => {
+    const req = requests.find((r) => r.id === requestId);
+    if (!req) return { success: false, error: 'Request not found' };
+
+    const now = new Date().toISOString();
+    const updated = requests.map((r) => {
+      if (r.id === requestId) {
+        return {
+          ...r,
+          status: 'rejected' as const,
+          adminNotes,
+          reviewedBy: user?.full_name || 'Admin',
+          reviewedAt: now,
+          updatedAt: now,
+        };
+      }
+      return r;
+    });
+
+    saveRequests(updated);
+
+    addActivityLog({
+      unitAssetTag: req.preferredAssetTag || req.resourceCategory.toUpperCase(),
+      unitModel: req.resourceLabel,
+      action: 'status_change',
+      title: `Request Rejected: ${req.resourceLabel}`,
+      description: `Request by ${req.employeeName} for ${req.project} was rejected. Reason: ${adminNotes}`,
+      performedBy: user?.full_name || 'Admin',
+      employeeId: req.employeeId,
+      employeeName: req.employeeName,
+      user: {
+        name: user?.full_name || 'Admin',
+        role: 'Operations Lead',
+      },
+    });
+
+    // Background persistence
+    try {
+      await fetch('/api/requests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'updateStatus',
+          requestId,
+          status: 'rejected',
+          adminNotes,
+          reviewedBy: user?.full_name || 'Admin',
+        }),
+      });
+    } catch {}
+
+    return { success: true };
+  };
+
   return (
     <InventoryContext.Provider
       value={{
@@ -991,6 +1294,7 @@ export function InventoryProvider({ children }: { children: React.ReactNode }) {
         chambers: enrichedChambers,
         assignments,
         activityLogs,
+        requests,
         isLoading,
         metrics,
         addLANforge,
@@ -1012,6 +1316,10 @@ export function InventoryProvider({ children }: { children: React.ReactNode }) {
         getEmployeeEquipment,
         addActivityLog,
         refreshInventory,
+        createRequest,
+        approveAndAssignRequest,
+        transferRequest,
+        rejectRequest,
       }}
     >
       {children}

@@ -181,3 +181,40 @@ export interface AIAssistantMessage {
   };
   queryResults?: QueryResultItem[];
 }
+
+export type ResourceCategory = 
+  | 'lanforge' 
+  | 'desktop' 
+  | 'mobile' 
+  | 'chamber' 
+  | 'attenuator' 
+  | 'accessory';
+
+export type RequestStatus = 'pending' | 'approved' | 'rejected';
+export type RequestPriority = 'Standard' | 'High Priority' | 'Urgent';
+
+export interface EquipmentRequest {
+  id: string;
+  employeeId: string;
+  employeeName: string;
+  employeeEmail: string;
+  resourceCategory: ResourceCategory;
+  resourceLabel: string;
+  targetSpecs?: string;
+  preferredAssetId?: string;
+  preferredAssetTag?: string;
+  project: string;
+  purpose: string;
+  priority: RequestPriority;
+  duration: string;
+  status: RequestStatus;
+  assignedAssetId?: string;
+  assignedAssetTag?: string;
+  assignedCategory?: EquipmentCategory;
+  adminNotes?: string;
+  reviewedBy?: string;
+  reviewedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
