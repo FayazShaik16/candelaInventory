@@ -909,3 +909,75 @@ ON CONFLICT (category, value) DO UPDATE SET
     label = EXCLUDED.label,
     description = EXCLUDED.description,
     is_active = EXCLUDED.is_active;
+
+-- ==============================================================================
+-- 5. EQUIPMENT & RESOURCE REQUESTS MANAGEMENT (PHASE 5)
+-- ==============================================================================
+
+do $$ begin
+  create type public.request_status_enum as enum ('pending', 'approved', 'rejected');
+exception
+  when duplicate_object then null;
+end $$;
+
+do $$ begin
+  create type public.request_priority_enum as enum ('Standard', 'High Priority', 'Urgent');
+exception
+  when duplicate_object then null;
+end $$;
+
+create table if not exists public.inventory_requests (
+  id text primary key,
+  employee_id uuid not null references public.profiles(id) on delete cascade,
+  employee_name text not null,
+  employee_email text not null,
+  resource_category text not null,
+  resource_label text not null,
+  target_specs text,
+  preferred_asset_id text,
+  preferred_asset_tag text,
+  project text not null,
+  purpose text not null,
+  priority text not null default 'Standard',
+  duration text not null default '2 Weeks',
+  status text not null default 'pending',
+  assigned_asset_id text,
+  assigned_asset_tag text,
+  assigned_category text,
+  admin_notes text,
+  reviewed_by text,
+  reviewed_at timestamptz,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists idx_inventory_requests_employee on public.inventory_requests(employee_id);
+create index if not exists idx_inventory_requests_status on public.inventory_requests(status);
+create index if not exists idx_inventory_requests_created_at on public.inventory_requests(created_at desc);
+
+alter table public.inventory_requests enable row level security;
+
+create policy "Allow read on inventory_requests"
+  on public.inventory_requests for select
+  using (
+    auth.uid() = employee_id or
+    exists (
+      select 1 from public.profiles
+      where id = auth.uid() and role = 'admin'
+    )
+  );
+
+create policy "Allow insert on inventory_requests"
+  on public.inventory_requests for insert
+  with check (auth.uid() = employee_id);
+
+create policy "Allow update on inventory_requests"
+  on public.inventory_requests for update
+  using (
+    (auth.uid() = employee_id and status = 'pending') or
+    exists (
+      select 1 from public.profiles
+      where id = auth.uid() and role = 'admin'
+    )
+  );
+

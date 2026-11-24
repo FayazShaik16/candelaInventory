@@ -5,10 +5,10 @@
 All migrations reside in `supabase/migrations/` and must be applied in order:
 
 ```
-001_auth_profiles.sql ──► 002_inventory_schema.sql ──► 003_assignments_and_activity_schema.sql ──► 004_dropdown_settings_schema.sql
+001_auth_profiles.sql ──► 002_inventory_schema.sql ──► 003_assignments_and_activity_schema.sql ──► 004_dropdown_settings_schema.sql ──► 005_equipment_requests_schema.sql
 ```
 
-A master runner file is provided at `supabase/schema.sql` which includes all four migrations via `\ir`.
+A master runner file is provided at `supabase/schema.sql` which includes all five migrations via `\ir`. A complete unified script is also at `supabase/full_production_schema.sql`.
 
 ---
 
@@ -53,7 +53,7 @@ FROM information_schema.tables
 WHERE table_schema = 'public'
 ORDER BY table_name;
 -- Expected: inventory_activity_logs, inventory_assignments, inventory_dropdown_settings,
---           lanforge_radios, lanforges, profiles, desktops, mobiles, chambers.
+--           inventory_requests, lanforge_radios, lanforges, profiles, desktops, mobiles, chambers.
 
 -- 2. Verify partial index on active assignments
 SELECT indexname, indexdef 
