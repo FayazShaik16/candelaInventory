@@ -19,7 +19,7 @@ import Link from 'next/link';
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { login, user, isLoading: isAuthLoading } = useAuth();
+  const { login, logout, user, isLoading: isAuthLoading } = useAuth();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -37,13 +37,12 @@ function LoginForm() {
       : '';
   const errorMessage = formError || urlErrorMessage;
 
-  // If already authenticated and active, redirect to home/dashboard
+  // Handle explicit logout query parameter if present
   useEffect(() => {
-    if (user && user.account_status === 'active' && !isAuthLoading) {
-      const redirectTo = searchParams.get('redirectTo') || '/';
-      router.push(redirectTo);
+    if (searchParams.get('logout') === 'true' && user) {
+      logout();
     }
-  }, [user, isAuthLoading, router, searchParams]);
+  }, [searchParams, user, logout]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -111,6 +110,32 @@ function LoginForm() {
             <div className="p-3 bg-[#FEF2F2] border border-[#FEE2E2] rounded-md text-xs text-[#DC2626] flex items-start gap-2">
               <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
               <span>{errorMessage}</span>
+            </div>
+          )}
+
+          {/* Active Session Info if already logged in */}
+          {user && (
+            <div className="p-3 bg-[#EBF4EF] border border-[#C2DCD0] rounded-md text-xs text-[#173D30] flex items-center justify-between gap-2">
+              <div className="min-w-0">
+                <span className="font-semibold block truncate">{user.full_name} ({user.role})</span>
+                <span className="text-[11px] text-[#64748B] block truncate">{user.email}</span>
+              </div>
+              <div className="flex items-center gap-1.5 flex-shrink-0">
+                <button
+                  type="button"
+                  onClick={() => router.push(searchParams.get('redirectTo') || '/')}
+                  className="px-2.5 py-1 text-xs font-semibold text-white bg-[#247A51] hover:bg-[#1D6342] rounded transition-colors"
+                >
+                  Enter App →
+                </button>
+                <button
+                  type="button"
+                  onClick={async () => { await logout(); }}
+                  className="px-2.5 py-1 text-xs font-semibold text-[#DC2626] hover:bg-[#FEF2F2] border border-[#FEE2E2] rounded transition-colors"
+                >
+                  Sign Out
+                </button>
+              </div>
             </div>
           )}
 

@@ -92,11 +92,13 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  // Redirect authenticated active user away from login to dashboard
-  if (isAuthPage && isAuthenticated && accountStatus === 'active') {
-    const url = request.nextUrl.clone();
-    url.pathname = '/';
-    return NextResponse.redirect(url);
+  // If user explicitly visits /login with logout or switch parameter, clear session cookies
+  if (pathname === '/login' && (request.nextUrl.searchParams.get('logout') === 'true' || request.nextUrl.searchParams.get('switch') === 'true')) {
+    const res = NextResponse.next();
+    res.cookies.delete('candela_session');
+    res.cookies.delete('candela_role');
+    res.cookies.delete('candela_status');
+    return res;
   }
 
   // Redirect unauthenticated user to login

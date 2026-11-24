@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { AppSidebar, NavItemKey } from './AppSidebar';
 import { AppHeader } from './AppHeader';
 import { MetricCard } from '../dashboard/MetricCard';
@@ -61,8 +62,15 @@ interface DashboardLayoutProps {
 }
 
 export function DashboardLayout({ initialNav = 'dashboard' }: DashboardLayoutProps) {
-  const { user, role } = useAuth();
+  const { user, role, isLoading } = useAuth();
+  const router = useRouter();
   const isAdmin = role === 'admin';
+
+  useEffect(() => {
+    if (!isLoading && !user) {
+      router.replace('/login');
+    }
+  }, [isLoading, user, router]);
 
   const {
     lanforges,
@@ -253,6 +261,17 @@ export function DashboardLayout({ initialNav = 'dashboard' }: DashboardLayoutPro
       setIsAddChamberOpen(true);
     }
   };
+
+  if (isLoading || !user) {
+    return (
+      <div className="flex h-screen w-screen items-center justify-center bg-[#F5F7F5] select-none">
+        <div className="flex flex-col items-center gap-2">
+          <div className="w-8 h-8 border-2 border-[#247A51] border-t-transparent rounded-full animate-spin" />
+          <span className="text-xs text-[#64748B] font-medium">Verifying clearance...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-[#F5F7F5] select-none text-[#172A21]">

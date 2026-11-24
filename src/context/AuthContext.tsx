@@ -59,6 +59,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       .catch((err) => console.warn('Could not fetch users from server:', err));
 
     try {
+      // One-time clear of previous auto-logged-in session so user starts fresh on /login
+      if (typeof window !== 'undefined' && !localStorage.getItem('candela_fresh_login_mode')) {
+        localStorage.removeItem(CURRENT_USER_KEY);
+        localStorage.setItem('candela_fresh_login_mode', 'true');
+        setSessionCookie(null);
+      }
+
       // 2. Initialize user list from localStorage or default
       const savedUsers = localStorage.getItem(USERS_STORAGE_KEY);
       if (savedUsers) {
@@ -118,11 +125,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setSessionCookie(null);
           }
         } else {
-          // Default initial session for immediate exploration is Admin Supervisor
-          const defaultAdmin = INITIAL_MOCK_PROFILES[0];
-          setUser(defaultAdmin);
-          setSessionCookie(defaultAdmin);
-          localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(defaultAdmin));
+          // NO AUTO-LOGIN: user remains unauthenticated until logging in explicitly
+          setUser(null);
+          setSessionCookie(null);
         }
       } catch {
         setUser(null);
