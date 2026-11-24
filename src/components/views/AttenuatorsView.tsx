@@ -81,8 +81,8 @@ export const INITIAL_ATTENUATORS: AttenuatorUnit[] = [
     stepSize: '1.0 dB',
     frequencyRange: '0.5 - 6.0 GHz',
     status: 'In-Use',
-    project: 'SpaceX',
-    custodian: 'Tejas',
+    project: 'Jio 5G',
+    custodian: 'Fayaz Ahmed',
     location: 'GVP Chamber Bay'
   },
   {

@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useInventory } from '@/context/InventoryContext';
 import { useDropdowns } from '@/context/DropdownContext';
+import { INITIAL_ATTENUATORS } from '@/components/views/AttenuatorsView';
 import { ResourceCategory, RequestPriority } from '@/types/inventory';
 import { 
   X, 
@@ -39,6 +40,16 @@ export function RequestResourceModal({
   const projectOptions = getItemsByCategory('projects', true);
 
   const [resourceCategory, setResourceCategory] = useState<ResourceCategory>(defaultCategory);
+
+  useEffect(() => {
+    if (isOpen) {
+      setResourceCategory(defaultCategory);
+      setPreferredAssetTag('');
+      setErrorMsg('');
+      setSuccessMsg('');
+    }
+  }, [isOpen, defaultCategory]);
+
   const [targetSpecs, setTargetSpecs] = useState('');
   const [preferredAssetTag, setPreferredAssetTag] = useState('');
   const [project, setProject] = useState('');
@@ -56,10 +67,10 @@ export function RequestResourceModal({
   // Category labels and icons
   const categories: { key: ResourceCategory; label: string; desc: string; icon: React.ElementType }[] = [
     { key: 'lanforge', label: 'LANforge Testbed', desc: 'Traffic generator / Wi-Fi 6E/7', icon: Radio },
+    { key: 'attenuator', label: 'RF Attenuator', desc: 'CAN-ATT 8x8 programmable box', icon: Sliders },
+    { key: 'chamber', label: 'RF / Anechoic Chamber', desc: 'Shielded box or OTA chamber', icon: Box },
     { key: 'mobile', label: 'Real Mobile Device', desc: 'Android / iOS client stations', icon: Smartphone },
     { key: 'desktop', label: 'Workstation / Desktop', desc: 'Linux / Windows test controllers', icon: Monitor },
-    { key: 'chamber', label: 'RF / Anechoic Chamber', desc: 'Shielded box or OTA chamber', icon: Box },
-    { key: 'attenuator', label: 'RF Attenuator', desc: 'CAN-ATT 8x8 programmable box', icon: Sliders },
     { key: 'accessory', label: 'Cables & Accessories', desc: 'RF cables, splitters, antennas', icon: Cable },
   ];
 
@@ -68,6 +79,8 @@ export function RequestResourceModal({
     switch (resourceCategory) {
       case 'lanforge':
         return lanforges.filter((i) => i.status === 'Available' && !i.isArchived).map((i) => ({ id: i.id, tag: i.lanforgeId, model: i.lanforgeModel }));
+      case 'attenuator':
+        return INITIAL_ATTENUATORS.filter((i) => i.status === 'Available').map((i) => ({ id: i.id, tag: i.tag, model: i.model }));
       case 'desktop':
         return desktops.filter((i) => i.status === 'Available' && !i.isArchived).map((i) => ({ id: i.id, tag: i.deviceId, model: `${i.deviceBrand} ${i.model}` }));
       case 'mobile':

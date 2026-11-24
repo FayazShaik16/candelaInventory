@@ -202,7 +202,7 @@ export function AppSidebar({
 
         {/* Navigation Items */}
         <div className="flex-1 px-3 py-3 overflow-y-auto sidebar-scroll space-y-1">
-          {/* Overview */}
+          {/* Dashboard Item (Visible to both Admin and User) */}
           {mainNavItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeNav === item.key;
@@ -224,104 +224,123 @@ export function AppSidebar({
             );
           })}
 
-          {/* Dedicated Inventory Categories */}
-          <div className="pt-4 px-2 pb-1.5 text-[11px] font-bold text-[#A3BFB2] uppercase tracking-wider">
-            {!collapsed ? 'Inventory Categories' : '•••'}
-          </div>
+          {isAdmin ? (
+            <>
+              {/* Dedicated Inventory Categories */}
+              <div className="pt-4 px-2 pb-1.5 text-[11px] font-bold text-[#A3BFB2] uppercase tracking-wider">
+                {!collapsed ? 'Inventory Categories' : '•••'}
+              </div>
 
-          {categoryNavItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = activeNav === item.key;
-            return (
+              {categoryNavItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = activeNav === item.key;
+                return (
+                  <button
+                    key={item.key}
+                    type="button"
+                    onClick={() => handleNavClick(item.key)}
+                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-[13.5px] font-medium transition-colors text-left ${
+                      isActive
+                        ? 'bg-[#28513F] text-[#FFFFFF] font-semibold shadow-sm'
+                        : 'text-[#E5EDE8] hover:bg-[#1E4637] hover:text-white'
+                    } ${collapsed ? 'justify-center px-0' : ''}`}
+                    title={collapsed ? item.label : undefined}
+                  >
+                    <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-[#FFFFFF]' : 'text-[#A3BFB2]'}`} />
+                    {!collapsed && <span className="flex-1 truncate">{item.label}</span>}
+                    {!collapsed && item.badge && (
+                      <span
+                        className={`text-xs px-2 py-0.5 rounded-full font-mono font-medium ${
+                          isActive ? 'bg-[#1E4637] text-white' : 'bg-[#1F4738] text-[#C2D6CC]'
+                        }`}
+                      >
+                        {item.badge}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+
+              {/* Operations & System */}
+              <div className="pt-4 px-2 pb-1.5 text-[11px] font-bold text-[#A3BFB2] uppercase tracking-wider">
+                {!collapsed ? 'Operations' : '•••'}
+              </div>
+
+              {operationsNavItems
+                .filter((item) => {
+                  if (item.adminOnly && !isAdmin) return false;
+                  if (item.employeeOnly && isAdmin) return false;
+                  return true;
+                })
+                .map((item) => {
+                  const Icon = item.icon;
+                  const isActive = activeNav === item.key;
+                  return (
+                    <button
+                      key={item.key}
+                      type="button"
+                      onClick={() => handleNavClick(item.key)}
+                      className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-[13.5px] font-medium transition-colors text-left ${
+                        isActive
+                          ? 'bg-[#28513F] text-[#FFFFFF] font-semibold shadow-sm'
+                          : 'text-[#E5EDE8] hover:bg-[#1E4637] hover:text-white'
+                      } ${collapsed ? 'justify-center px-0' : ''}`}
+                      title={collapsed ? item.label : undefined}
+                    >
+                      <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-[#FFFFFF]' : 'text-[#A3BFB2]'}`} />
+                      {!collapsed && <span className="flex-1 truncate">{item.label}</span>}
+                      {!collapsed && item.badge && (
+                        <span 
+                          className={`text-[11px] px-2 py-0.5 rounded font-mono font-medium ${
+                            item.isHighlight 
+                              ? 'bg-[#EAB308]/20 text-[#FEF08A] border border-[#CA8A04]/40 font-bold animate-pulse'
+                              : 'bg-[#1E4637] text-[#C2D6CC] border border-[#28513F]'
+                          }`}
+                        >
+                          {item.badge}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+
               <button
-                key={item.key}
                 type="button"
-                onClick={() => handleNavClick(item.key)}
-                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-[13.5px] font-medium transition-colors text-left ${
-                  isActive
+                onClick={() => handleNavClick('settings')}
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-[13.5px] font-medium transition-colors text-left mt-2 ${
+                  activeNav === 'settings'
                     ? 'bg-[#28513F] text-[#FFFFFF] font-semibold shadow-sm'
                     : 'text-[#E5EDE8] hover:bg-[#1E4637] hover:text-white'
                 } ${collapsed ? 'justify-center px-0' : ''}`}
-                title={collapsed ? item.label : undefined}
+                title={collapsed ? 'Settings' : undefined}
               >
-                <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-[#FFFFFF]' : 'text-[#A3BFB2]'}`} />
-                {!collapsed && <span className="flex-1 truncate">{item.label}</span>}
-                {!collapsed && item.badge && (
-                  <span
-                    className={`text-xs px-2 py-0.5 rounded-full font-mono font-medium ${
-                      isActive ? 'bg-[#1E4637] text-white' : 'bg-[#1F4738] text-[#C2D6CC]'
-                    }`}
-                  >
-                    {item.badge}
-                  </span>
-                )}
+                <Settings className={`w-4 h-4 flex-shrink-0 ${activeNav === 'settings' ? 'text-white' : 'text-[#A3BFB2]'}`} />
+                {!collapsed && <span className="flex-1 truncate">Settings</span>}
               </button>
-            );
-          })}
-
-          {/* Operations & System */}
-          <div className="pt-4 px-2 pb-1.5 text-[11px] font-bold text-[#A3BFB2] uppercase tracking-wider">
-            {!collapsed ? 'Operations' : '•••'}
-          </div>
-
-          {operationsNavItems
-            .filter((item) => {
-              if (item.adminOnly && !isAdmin) return false;
-              if (item.employeeOnly && isAdmin) return false;
-              return true;
-            })
-            .map((item) => {
-              const Icon = item.icon;
-              const isActive = activeNav === item.key;
-              return (
-                <button
-                  key={item.key}
-                  type="button"
-                  onClick={() => handleNavClick(item.key)}
-                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-[13.5px] font-medium transition-colors text-left ${
-                    isActive
-                      ? 'bg-[#28513F] text-[#FFFFFF] font-semibold shadow-sm'
-                      : 'text-[#E5EDE8] hover:bg-[#1E4637] hover:text-white'
-                  } ${collapsed ? 'justify-center px-0' : ''}`}
-                  title={collapsed ? item.label : undefined}
-                >
-                  <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-[#FFFFFF]' : 'text-[#A3BFB2]'}`} />
-                  {!collapsed && <span className="flex-1 truncate">{item.label}</span>}
-                  {!collapsed && item.badge && (
-                    <span 
-                      className={`text-[11px] px-2 py-0.5 rounded font-mono font-medium ${
-                        item.isHighlight 
-                          ? 'bg-[#EAB308]/20 text-[#FEF08A] border border-[#CA8A04]/40 font-bold animate-pulse'
-                          : 'bg-[#1E4637] text-[#C2D6CC] border border-[#28513F]'
-                      }`}
-                    >
-                      {item.badge}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-
-          {isAdmin && (
-            <button
-              type="button"
-              onClick={() => handleNavClick('settings')}
-              className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-[13.5px] font-medium transition-colors text-left ${
-                activeNav === 'settings'
-                  ? 'bg-[#28513F] text-[#FFFFFF] font-semibold shadow-sm'
-                  : 'text-[#E5EDE8] hover:bg-[#1E4637] hover:text-white'
-              } ${collapsed ? 'justify-center px-0' : ''}`}
-              title={collapsed ? 'Settings' : undefined}
-            >
-              <Settings className={`w-4 h-4 flex-shrink-0 ${activeNav === 'settings' ? 'text-white' : 'text-[#A3BFB2]'}`} />
-              {!collapsed && <span className="flex-1 truncate">Settings</span>}
-            </button>
+            </>
+          ) : (
+            /* Regular User: Strictly ONLY Dashboard and User Settings */
+            <div className="pt-1">
+              <button
+                type="button"
+                onClick={() => handleNavClick('settings')}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13.5px] font-medium transition-colors text-left ${
+                  activeNav === 'settings'
+                    ? 'bg-[#28513F] text-[#FFFFFF] font-semibold shadow-sm'
+                    : 'text-[#E5EDE8] hover:bg-[#1E4637] hover:text-white'
+                } ${collapsed ? 'justify-center px-0' : ''}`}
+                title={collapsed ? 'User Settings' : undefined}
+              >
+                <Settings className={`w-4 h-4 flex-shrink-0 ${activeNav === 'settings' ? 'text-white' : 'text-[#A3BFB2]'}`} />
+                {!collapsed && <span className="flex-1 truncate">User Settings</span>}
+              </button>
+            </div>
           )}
         </div>
 
         {/* User Profile */}
         <div className="p-2.5 border-t border-[#1E4637] flex-shrink-0">
-          <UserProfileMenu collapsed={collapsed} />
+          <UserProfileMenu collapsed={collapsed} onSelectNav={handleNavClick} />
         </div>
       </aside>
     </>

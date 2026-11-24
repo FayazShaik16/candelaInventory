@@ -9,6 +9,7 @@ import { AIAssistantPanel } from '../assistant/AIAssistantPanel';
 import { AssignmentsView } from '../views/AssignmentsView';
 import { UsersView } from '../views/UsersView';
 import { SettingsView } from '../views/SettingsView';
+import { UserSettingsView } from '../views/UserSettingsView';
 import { ProfileView } from '../views/ProfileView';
 import { RequestsView } from '../views/RequestsView';
 import { LogsView } from '../views/LogsView';
@@ -95,6 +96,7 @@ export function DashboardLayout({ initialNav = 'dashboard' }: DashboardLayoutPro
   // Navigation State with History Stack
   const [navHistory, setNavHistory] = useState<NavItemKey[]>([]);
   const [activeNav, setActiveNavState] = useState<NavItemKey>(() => {
+    if (!isAdmin && initialNav !== 'settings') return 'dashboard';
     if (initialNav === 'users' && role === 'employee') return 'dashboard';
     return initialNav;
   });
@@ -120,20 +122,20 @@ export function DashboardLayout({ initialNav = 'dashboard' }: DashboardLayoutPro
   const canGoBack = navHistory.length > 0 || activeNav !== 'dashboard';
 
   useEffect(() => {
-    if (!isAdmin && (activeNav === 'users' || activeNav === 'settings' || activeNav === 'logs')) {
+    if (!isAdmin && activeNav !== 'dashboard' && activeNav !== 'settings') {
       setActiveNavState('dashboard');
     }
   }, [isAdmin, activeNav]);
 
   useEffect(() => {
     if (initialNav && initialNav !== activeNav) {
-      if (initialNav === 'users' && role === 'employee') {
+      if (!isAdmin && initialNav !== 'dashboard' && initialNav !== 'settings') {
         setActiveNavState('dashboard');
       } else {
         setActiveNav(initialNav);
       }
     }
-  }, [initialNav]);
+  }, [initialNav, isAdmin]);
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -307,12 +309,31 @@ export function DashboardLayout({ initialNav = 'dashboard' }: DashboardLayoutPro
           {/* 2. CENTER WORKSPACE (FLEXIBLE WIDTH) */}
           <main className="flex-1 overflow-y-auto p-4 md:p-6 bg-[#F5F7F5] space-y-6">
 
-            {/* VIEW: DASHBOARD (Landing Page: Viewport 1 Categories + Viewport 2 Status Distribution) */}
+            {/* VIEW: DASHBOARD (Admin: Landing Page with 2 Viewports; Employee: Employee Custody Dashboard) */}
             {activeNav === 'dashboard' && (
-              <LandingPageView
-                onNavigate={(nav) => setActiveNav(nav)}
-                onRequestResource={isAdmin ? undefined : () => setIsResourceRequestOpen(true)}
-              />
+              isAdmin ? (
+                <LandingPageView
+                  onNavigate={(nav) => setActiveNav(nav)}
+                />
+              ) : (
+                <EmployeeDashboardView
+                  onViewUnit={(cat, id) => {
+                    if (cat === 'lanforge') {
+                      const lf = lanforges.find(l => l.id === id);
+                      if (lf) setDetailLANforge(lf);
+                    } else if (cat === 'desktop') {
+                      const dt = desktops.find(d => d.id === id);
+                      if (dt) setDetailDesktop(dt);
+                    } else if (cat === 'mobile') {
+                      const mb = mobiles.find(m => m.id === id);
+                      if (mb) setDetailMobile(mb);
+                    } else if (cat === 'chamber') {
+                      const ch = chambers.find(c => c.id === id);
+                      if (ch) setDetailChamber(ch);
+                    }
+                  }}
+                />
+              )
             )}
 
             {/* VIEW: LANFORGES */}
@@ -600,8 +621,16 @@ export function DashboardLayout({ initialNav = 'dashboard' }: DashboardLayoutPro
             {/* VIEW: USERS (Admin only) */}
             {activeNav === 'users' && (isAdmin ? <UsersView /> : null)}
 
-            {/* VIEW: SETTINGS (Admin only) */}
-            {activeNav === 'settings' && (isAdmin ? <SettingsView /> : null)}
+            {/* VIEW: SETTINGS (Admin: Platform Dropdowns; Employee: User Profile & Custody Settings) */}
+            {activeNav === 'settings' && (
+              isAdmin ? (
+                <SettingsView />
+              ) : (
+                <UserSettingsView
+                  onNavigateToDashboard={() => setActiveNav('dashboard')}
+                />
+              )
+            )}
 
             {/* VIEW: PROFILE */}
             {activeNav === 'profile' && <ProfileView />}

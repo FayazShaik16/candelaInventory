@@ -11,12 +11,14 @@ import {
   Shield
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import type { NavItemKey } from './AppSidebar';
 
 interface UserProfileMenuProps {
   collapsed?: boolean;
+  onSelectNav?: (key: NavItemKey) => void;
 }
 
-export function UserProfileMenu({ collapsed = false }: UserProfileMenuProps) {
+export function UserProfileMenu({ collapsed = false, onSelectNav }: UserProfileMenuProps) {
   const { user, role, logout } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -103,19 +105,23 @@ export function UserProfileMenu({ collapsed = false }: UserProfileMenuProps) {
               type="button"
               onClick={() => {
                 setIsOpen(false);
-                alert(`User Profile: ${fullName}\nRole: ${isAdmin ? 'Administrator' : 'Employee'}\nAccount: Active`);
+                if (onSelectNav) {
+                  onSelectNav('settings');
+                }
               }}
               className="w-full flex items-center gap-2.5 px-3 py-1.5 hover:bg-[#F5F7F5] text-[#172A21] transition-colors text-left"
             >
-              <User className="w-4 h-4 text-[#64748B]" />
-              <span>My Profile</span>
+              <Settings className="w-4 h-4 text-[#64748B]" />
+              <span>{isAdmin ? 'System Settings' : 'User Settings'}</span>
             </button>
             {isAdmin && (
               <button
                 type="button"
                 onClick={() => {
                   setIsOpen(false);
-                  window.location.href = '/users';
+                  if (onSelectNav) {
+                    onSelectNav('users');
+                  }
                 }}
                 className="w-full flex items-center gap-2.5 px-3 py-1.5 hover:bg-[#F5F7F5] text-[#172A21] transition-colors text-left"
               >
