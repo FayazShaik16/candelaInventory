@@ -104,59 +104,65 @@ export function LandingPageView({ onNavigate, onRequestResource }: LandingPageVi
           </div>
         </div>
 
-        {/* 4 Rectangular Boxes with Curved Edges */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 my-4 flex-1 items-stretch">
+        {/* 4 Rectangular Boxes with Curved Edges (2 Rows x 2 Boxes per Row, 16:9 Aspect Ratio) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6 my-4 flex-1 items-stretch">
           
           {/* BOX 1: LANFORGES */}
           <div
             onClick={() => onNavigate('lanforges')}
-            className="group relative flex flex-col justify-between bg-white rounded-2xl border border-[#E5EBE6] hover:border-[#247A51] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1"
+            className="group relative aspect-video w-full rounded-2xl lg:rounded-3xl border border-[#E5EBE6] hover:border-[#247A51] overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1 bg-[#173D30]"
           >
-            {/* Thumbnail Image Container */}
-            <div className="relative h-56 sm:h-64 lg:h-72 w-full overflow-hidden bg-[#173D30]">
-              <img
-                src="/Images/lanforges.webp"
-                alt="Candela LANforges"
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-              
-              {/* Category Pill Tag */}
-              <div className="absolute top-3.5 left-3.5">
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-white/90 backdrop-blur-md text-[#172A21] shadow-sm">
-                  <Radio className="w-3.5 h-3.5 text-[#247A51]" />
-                  Traffic Generators
-                </span>
-              </div>
+            {/* 16:9 Full Image */}
+            <img
+              src="/Images/lanforges.webp"
+              alt="Candela LANforges"
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+            {/* Elegant Atmospheric Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/30 group-hover:via-black/20 transition-colors" />
 
-              {/* Count Badge on image */}
-              <div className="absolute top-3.5 right-3.5">
-                <span className="px-2.5 py-1 rounded-full text-xs font-bold font-mono bg-[#247A51] text-white shadow-md">
-                  {lanforgesTotal} Units
-                </span>
-              </div>
-
-              {/* Title Overlay */}
-              <div className="absolute bottom-3.5 left-3.5 right-3.5 text-white">
-                <h3 className="text-xl font-bold tracking-tight drop-shadow-sm">
-                  LANforges
-                </h3>
-                <p className="text-xs text-white/90 drop-shadow-sm mt-0.5 line-clamp-1">
-                  Wi-Fi 7 / 6E traffic generators & multi-radio testbeds
-                </p>
-              </div>
+            {/* Top Bar: Category Pill & Live Count */}
+            <div className="absolute top-4 left-4 right-4 flex items-center justify-between">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white/95 backdrop-blur-md text-[#172A21] shadow-sm">
+                <Radio className="w-3.5 h-3.5 text-[#247A51]" />
+                <span>LANforges Testbeds</span>
+              </span>
+              <span className="px-3 py-1 rounded-full text-xs font-bold font-mono bg-[#247A51] text-white shadow-md">
+                {lanforgesTotal} Units
+              </span>
             </div>
 
-            {/* Bottom Details Footer */}
-            <div className="p-4 bg-white flex items-center justify-between border-t border-[#E5EBE6]">
-              <div className="flex items-center gap-2 text-xs text-[#64748B]">
-                <span className="inline-block w-2 h-2 rounded-full bg-[#16A34A]" />
-                <span>{lanforgesInUse} In-Use</span>
-                <span className="text-[#CBD5E1]">•</span>
-                <span>{lanforgesAvailable} Available</span>
-              </div>
-              <div className="w-7 h-7 rounded-full bg-[#EBF4EF] group-hover:bg-[#247A51] text-[#247A51] group-hover:text-white flex items-center justify-center transition-colors">
-                <ArrowRight className="w-3.5 h-3.5" />
+            {/* Bottom Content Overlay */}
+            <div className="absolute bottom-4 left-4 right-4 text-white">
+              <div className="flex items-end justify-between gap-3">
+                <div>
+                  <h3 className="text-xl sm:text-2xl font-bold tracking-tight drop-shadow-md">
+                    LANforges
+                  </h3>
+                  <p className="text-xs sm:text-sm text-white/90 drop-shadow-sm mt-0.5 line-clamp-1">
+                    Multi-station Wi-Fi 7 / 6E traffic generators & radio hardware testbeds
+                  </p>
+                  <div className="flex items-center gap-2 mt-2 text-xs text-white/80">
+                    <span className="inline-flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-[#22C55E]" />
+                      <strong className="text-white">{lanforgesInUse}</strong> In-Use
+                    </span>
+                    <span className="text-white/40">•</span>
+                    <span className="inline-flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-[#38BDF8]" />
+                      <strong className="text-white">{lanforgesAvailable}</strong> Available
+                    </span>
+                    <span className="text-white/40">•</span>
+                    <span className="inline-flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-[#FB923C]" />
+                      <strong className="text-white">{lanforgesMaintenance}</strong> Maintenance
+                    </span>
+                  </div>
+                </div>
+
+                <div className="w-9 h-9 rounded-full bg-white/90 group-hover:bg-[#247A51] text-[#172A21] group-hover:text-white flex items-center justify-center flex-shrink-0 transition-colors shadow-md">
+                  <ArrowRight className="w-4 h-4" />
+                </div>
               </div>
             </div>
           </div>
@@ -164,53 +170,59 @@ export function LandingPageView({ onNavigate, onRequestResource }: LandingPageVi
           {/* BOX 2: ATTENUATORS */}
           <div
             onClick={() => onNavigate('attenuators')}
-            className="group relative flex flex-col justify-between bg-white rounded-2xl border border-[#E5EBE6] hover:border-[#247A51] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1"
+            className="group relative aspect-video w-full rounded-2xl lg:rounded-3xl border border-[#E5EBE6] hover:border-[#247A51] overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1 bg-[#173D30]"
           >
-            {/* Thumbnail Image Container */}
-            <div className="relative h-56 sm:h-64 lg:h-72 w-full overflow-hidden bg-[#173D30]">
-              <img
-                src="/Images/attenuators.webp"
-                alt="Programmable RF Attenuators"
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-              
-              {/* Category Pill Tag */}
-              <div className="absolute top-3.5 left-3.5">
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-white/90 backdrop-blur-md text-[#172A21] shadow-sm">
-                  <Sliders className="w-3.5 h-3.5 text-[#0369A1]" />
-                  RF Pathloss
-                </span>
-              </div>
+            {/* 16:9 Full Image */}
+            <img
+              src="/Images/attenuators.webp"
+              alt="Programmable RF Attenuators"
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+            {/* Elegant Atmospheric Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/30 group-hover:via-black/20 transition-colors" />
 
-              {/* Count Badge on image */}
-              <div className="absolute top-3.5 right-3.5">
-                <span className="px-2.5 py-1 rounded-full text-xs font-bold font-mono bg-[#0369A1] text-white shadow-md">
-                  {attenuatorsTotal} Units
-                </span>
-              </div>
-
-              {/* Title Overlay */}
-              <div className="absolute bottom-3.5 left-3.5 right-3.5 text-white">
-                <h3 className="text-xl font-bold tracking-tight drop-shadow-sm">
-                  Attenuators
-                </h3>
-                <p className="text-xs text-white/90 drop-shadow-sm mt-0.5 line-clamp-1">
-                  Programmable 8x8 & 4x4 RF step attenuator banks
-                </p>
-              </div>
+            {/* Top Bar: Category Pill & Live Count */}
+            <div className="absolute top-4 left-4 right-4 flex items-center justify-between">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white/95 backdrop-blur-md text-[#172A21] shadow-sm">
+                <Sliders className="w-3.5 h-3.5 text-[#0369A1]" />
+                <span>RF Pathloss Matrix</span>
+              </span>
+              <span className="px-3 py-1 rounded-full text-xs font-bold font-mono bg-[#0369A1] text-white shadow-md">
+                {attenuatorsTotal} Units
+              </span>
             </div>
 
-            {/* Bottom Details Footer */}
-            <div className="p-4 bg-white flex items-center justify-between border-t border-[#E5EBE6]">
-              <div className="flex items-center gap-2 text-xs text-[#64748B]">
-                <span className="inline-block w-2 h-2 rounded-full bg-[#0284C7]" />
-                <span>{attenuatorsInUse} In-Use</span>
-                <span className="text-[#CBD5E1]">•</span>
-                <span>{attenuatorsAvailable} Available</span>
-              </div>
-              <div className="w-7 h-7 rounded-full bg-[#EBF4EF] group-hover:bg-[#247A51] text-[#247A51] group-hover:text-white flex items-center justify-center transition-colors">
-                <ArrowRight className="w-3.5 h-3.5" />
+            {/* Bottom Content Overlay */}
+            <div className="absolute bottom-4 left-4 right-4 text-white">
+              <div className="flex items-end justify-between gap-3">
+                <div>
+                  <h3 className="text-xl sm:text-2xl font-bold tracking-tight drop-shadow-md">
+                    Attenuators
+                  </h3>
+                  <p className="text-xs sm:text-sm text-white/90 drop-shadow-sm mt-0.5 line-clamp-1">
+                    Programmable 8x8 & 4x4 RF step attenuator banks with 0.5dB step accuracy
+                  </p>
+                  <div className="flex items-center gap-2 mt-2 text-xs text-white/80">
+                    <span className="inline-flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-[#22C55E]" />
+                      <strong className="text-white">{attenuatorsInUse}</strong> In-Use
+                    </span>
+                    <span className="text-white/40">•</span>
+                    <span className="inline-flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-[#38BDF8]" />
+                      <strong className="text-white">{attenuatorsAvailable}</strong> Available
+                    </span>
+                    <span className="text-white/40">•</span>
+                    <span className="inline-flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-[#FB923C]" />
+                      <strong className="text-white">{attenuatorsMaintenance}</strong> Maintenance
+                    </span>
+                  </div>
+                </div>
+
+                <div className="w-9 h-9 rounded-full bg-white/90 group-hover:bg-[#247A51] text-[#172A21] group-hover:text-white flex items-center justify-center flex-shrink-0 transition-colors shadow-md">
+                  <ArrowRight className="w-4 h-4" />
+                </div>
               </div>
             </div>
           </div>
@@ -218,53 +230,59 @@ export function LandingPageView({ onNavigate, onRequestResource }: LandingPageVi
           {/* BOX 3: REAL DEVICES */}
           <div
             onClick={() => onNavigate('mobiles')}
-            className="group relative flex flex-col justify-between bg-white rounded-2xl border border-[#E5EBE6] hover:border-[#247A51] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1"
+            className="group relative aspect-video w-full rounded-2xl lg:rounded-3xl border border-[#E5EBE6] hover:border-[#247A51] overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1 bg-[#173D30]"
           >
-            {/* Thumbnail Image Container */}
-            <div className="relative h-56 sm:h-64 lg:h-72 w-full overflow-hidden bg-[#173D30]">
-              <img
-                src="/Images/real_devices.webp"
-                alt="Candela Real Devices Fleet"
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-              
-              {/* Category Pill Tag */}
-              <div className="absolute top-3.5 left-3.5">
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-white/90 backdrop-blur-md text-[#172A21] shadow-sm">
-                  <Smartphone className="w-3.5 h-3.5 text-[#7E22CE]" />
-                  Client Fleet
-                </span>
-              </div>
+            {/* 16:9 Full Image */}
+            <img
+              src="/Images/real_devices.webp"
+              alt="Candela Real Devices Fleet"
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+            {/* Elegant Atmospheric Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/30 group-hover:via-black/20 transition-colors" />
 
-              {/* Count Badge on image */}
-              <div className="absolute top-3.5 right-3.5">
-                <span className="px-2.5 py-1 rounded-full text-xs font-bold font-mono bg-[#7E22CE] text-white shadow-md">
-                  {realDevicesTotal} Units
-                </span>
-              </div>
-
-              {/* Title Overlay */}
-              <div className="absolute bottom-3.5 left-3.5 right-3.5 text-white">
-                <h3 className="text-xl font-bold tracking-tight drop-shadow-sm">
-                  Real Devices
-                </h3>
-                <p className="text-xs text-white/90 drop-shadow-sm mt-0.5 line-clamp-1">
-                  Smartphones, tablets & client handsets for test campaigns
-                </p>
-              </div>
+            {/* Top Bar: Category Pill & Live Count */}
+            <div className="absolute top-4 left-4 right-4 flex items-center justify-between">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white/95 backdrop-blur-md text-[#172A21] shadow-sm">
+                <Smartphone className="w-3.5 h-3.5 text-[#7E22CE]" />
+                <span>Client Device Fleet</span>
+              </span>
+              <span className="px-3 py-1 rounded-full text-xs font-bold font-mono bg-[#7E22CE] text-white shadow-md">
+                {realDevicesTotal} Units
+              </span>
             </div>
 
-            {/* Bottom Details Footer */}
-            <div className="p-4 bg-white flex items-center justify-between border-t border-[#E5EBE6]">
-              <div className="flex items-center gap-2 text-xs text-[#64748B]">
-                <span className="inline-block w-2 h-2 rounded-full bg-[#16A34A]" />
-                <span>{realDevicesInUse} In-Use</span>
-                <span className="text-[#CBD5E1]">•</span>
-                <span>{realDevicesAvailable} Available</span>
-              </div>
-              <div className="w-7 h-7 rounded-full bg-[#EBF4EF] group-hover:bg-[#247A51] text-[#247A51] group-hover:text-white flex items-center justify-center transition-colors">
-                <ArrowRight className="w-3.5 h-3.5" />
+            {/* Bottom Content Overlay */}
+            <div className="absolute bottom-4 left-4 right-4 text-white">
+              <div className="flex items-end justify-between gap-3">
+                <div>
+                  <h3 className="text-xl sm:text-2xl font-bold tracking-tight drop-shadow-md">
+                    Real Devices
+                  </h3>
+                  <p className="text-xs sm:text-sm text-white/90 drop-shadow-sm mt-0.5 line-clamp-1">
+                    Automated smartphones, tablets & reference clients for test campaigns
+                  </p>
+                  <div className="flex items-center gap-2 mt-2 text-xs text-white/80">
+                    <span className="inline-flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-[#22C55E]" />
+                      <strong className="text-white">{realDevicesInUse}</strong> In-Use
+                    </span>
+                    <span className="text-white/40">•</span>
+                    <span className="inline-flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-[#38BDF8]" />
+                      <strong className="text-white">{realDevicesAvailable}</strong> Available
+                    </span>
+                    <span className="text-white/40">•</span>
+                    <span className="inline-flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-[#FB923C]" />
+                      <strong className="text-white">{realDevicesMaintenance}</strong> Maintenance
+                    </span>
+                  </div>
+                </div>
+
+                <div className="w-9 h-9 rounded-full bg-white/90 group-hover:bg-[#247A51] text-[#172A21] group-hover:text-white flex items-center justify-center flex-shrink-0 transition-colors shadow-md">
+                  <ArrowRight className="w-4 h-4" />
+                </div>
               </div>
             </div>
           </div>
@@ -272,53 +290,59 @@ export function LandingPageView({ onNavigate, onRequestResource }: LandingPageVi
           {/* BOX 4: CHAMBERS */}
           <div
             onClick={() => onNavigate('chambers')}
-            className="group relative flex flex-col justify-between bg-white rounded-2xl border border-[#E5EBE6] hover:border-[#247A51] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1"
+            className="group relative aspect-video w-full rounded-2xl lg:rounded-3xl border border-[#E5EBE6] hover:border-[#247A51] overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1 bg-[#173D30]"
           >
-            {/* Thumbnail Image Container */}
-            <div className="relative h-56 sm:h-64 lg:h-72 w-full overflow-hidden bg-[#173D30]">
-              <img
-                src="/Images/chambers.webp"
-                alt="RF Isolation & Anechoic Chambers"
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-              
-              {/* Category Pill Tag */}
-              <div className="absolute top-3.5 left-3.5">
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-white/90 backdrop-blur-md text-[#172A21] shadow-sm">
-                  <Box className="w-3.5 h-3.5 text-[#B45309]" />
-                  RF Enclosures
-                </span>
-              </div>
+            {/* 16:9 Full Image */}
+            <img
+              src="/Images/chambers.webp"
+              alt="RF Isolation & Anechoic Chambers"
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+            {/* Elegant Atmospheric Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/30 group-hover:via-black/20 transition-colors" />
 
-              {/* Count Badge on image */}
-              <div className="absolute top-3.5 right-3.5">
-                <span className="px-2.5 py-1 rounded-full text-xs font-bold font-mono bg-[#B45309] text-white shadow-md">
-                  {chambers.length} Units
-                </span>
-              </div>
-
-              {/* Title Overlay */}
-              <div className="absolute bottom-3.5 left-3.5 right-3.5 text-white">
-                <h3 className="text-xl font-bold tracking-tight drop-shadow-sm">
-                  Chambers
-                </h3>
-                <p className="text-xs text-white/90 drop-shadow-sm mt-0.5 line-clamp-1">
-                  RF isolation, reverberation & anechoic test chambers
-                </p>
-              </div>
+            {/* Top Bar: Category Pill & Live Count */}
+            <div className="absolute top-4 left-4 right-4 flex items-center justify-between">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white/95 backdrop-blur-md text-[#172A21] shadow-sm">
+                <Box className="w-3.5 h-3.5 text-[#B45309]" />
+                <span>RF Isolation Enclosures</span>
+              </span>
+              <span className="px-3 py-1 rounded-full text-xs font-bold font-mono bg-[#B45309] text-white shadow-md">
+                {chambers.length} Units
+              </span>
             </div>
 
-            {/* Bottom Details Footer */}
-            <div className="p-4 bg-white flex items-center justify-between border-t border-[#E5EBE6]">
-              <div className="flex items-center gap-2 text-xs text-[#64748B]">
-                <span className="inline-block w-2 h-2 rounded-full bg-[#B45309]" />
-                <span>{chambers.filter(c => c.status === 'In-Use' && !c.isArchived).length} In-Use</span>
-                <span className="text-[#CBD5E1]">•</span>
-                <span>{chambers.filter(c => c.status === 'Available' && !c.isArchived).length} Available</span>
-              </div>
-              <div className="w-7 h-7 rounded-full bg-[#EBF4EF] group-hover:bg-[#247A51] text-[#247A51] group-hover:text-white flex items-center justify-center transition-colors">
-                <ArrowRight className="w-3.5 h-3.5" />
+            {/* Bottom Content Overlay */}
+            <div className="absolute bottom-4 left-4 right-4 text-white">
+              <div className="flex items-end justify-between gap-3">
+                <div>
+                  <h3 className="text-xl sm:text-2xl font-bold tracking-tight drop-shadow-md">
+                    Chambers
+                  </h3>
+                  <p className="text-xs sm:text-sm text-white/90 drop-shadow-sm mt-0.5 line-clamp-1">
+                    RF isolation, reverberation & anechoic chambers with filtered feedthroughs
+                  </p>
+                  <div className="flex items-center gap-2 mt-2 text-xs text-white/80">
+                    <span className="inline-flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-[#22C55E]" />
+                      <strong className="text-white">{chambers.filter(c => c.status === 'In-Use' && !c.isArchived).length}</strong> In-Use
+                    </span>
+                    <span className="text-white/40">•</span>
+                    <span className="inline-flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-[#38BDF8]" />
+                      <strong className="text-white">{chambers.filter(c => c.status === 'Available' && !c.isArchived).length}</strong> Available
+                    </span>
+                    <span className="text-white/40">•</span>
+                    <span className="inline-flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-[#FB923C]" />
+                      <strong className="text-white">{chambers.filter(c => c.status === 'Under Maintenance' && !c.isArchived).length}</strong> Maintenance
+                    </span>
+                  </div>
+                </div>
+
+                <div className="w-9 h-9 rounded-full bg-white/90 group-hover:bg-[#247A51] text-[#172A21] group-hover:text-white flex items-center justify-center flex-shrink-0 transition-colors shadow-md">
+                  <ArrowRight className="w-4 h-4" />
+                </div>
               </div>
             </div>
           </div>
