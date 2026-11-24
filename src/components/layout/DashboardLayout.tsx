@@ -34,6 +34,7 @@ import { AddEditMobileModal } from '../inventory/mobile/AddEditMobileModal';
 import { ChamberTable } from '../inventory/chamber/ChamberTable';
 import { ChamberDetailPanel } from '../inventory/chamber/ChamberDetailPanel';
 import { AddEditChamberModal } from '../inventory/chamber/AddEditChamberModal';
+import { RealDevicesTable, RealDeviceType } from '../inventory/realDevices/RealDevicesTable';
 
 import { useAuth } from '@/context/AuthContext';
 import { useInventory } from '@/context/InventoryContext';
@@ -407,103 +408,47 @@ export function DashboardLayout({ initialNav = 'dashboard' }: DashboardLayoutPro
               <AttenuatorsView onRequestResource={isAdmin ? undefined : () => setIsResourceRequestOpen(true)} />
             )}
 
-            {/* VIEW: DESKTOPS */}
-            {activeNav === 'desktops' && (
+            {/* VIEW: REAL DEVICES (COMBINED MOBILES & DESKTOPS) */}
+            {(activeNav === 'real-devices' || activeNav === 'mobiles' || activeNav === 'desktops') && (
               <div className="space-y-4">
-                <div className="flex items-center justify-between pb-1">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1">
                   <div>
                     <h1 className="text-xl font-bold tracking-tight text-[#172A21]">
-                      {isAdmin ? 'Workstation & Desktop Registry' : 'My Assigned Workstations & PCs'}
+                      {isAdmin ? 'Real Client Devices Fleet' : 'My Assigned Real Devices'}
                     </h1>
                     <p className="text-xs text-[#64748B]">
                       {isAdmin
-                        ? 'Inventory of engineering workstations, benchtop controllers, and lab PC units.'
-                        : 'Workstations and controllers currently assigned to you for lab execution.'}
+                        ? 'Unified inventory of test client hardware including mobile smartphones, tablets, workstations, and desktop controllers.'
+                        : 'Real test client devices, smartphones, and workstations currently checked out to your custody.'}
                     </p>
                   </div>
                   {isAdmin ? (
-                    <button
-                      type="button"
-                      onClick={() => setIsAddDesktopOpen(true)}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-[#247A51] hover:bg-[#1D6342] rounded transition-colors"
-                    >
-                      <Plus className="w-3.5 h-3.5" />
-                      <span>Register Desktop</span>
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => setIsResourceRequestOpen(true)}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-[#247A51] hover:bg-[#1D6342] rounded transition-colors"
-                    >
-                      <Plus className="w-3.5 h-3.5" />
-                      <span>Request Desktop</span>
-                    </button>
-                  )}
-                </div>
-
-                {!isAdmin && (
-                  <div className="flex items-center justify-between p-3 rounded-lg bg-[#EBF4EF] border border-[#C2DCD0] text-xs text-[#173D30]">
                     <div className="flex items-center gap-2">
-                      <Monitor className="w-4 h-4 text-[#247A51]" />
-                      <span>
-                        {userDesktops.length === 0
-                          ? 'You currently do not have any workstations assigned in your custody.'
-                          : `Displaying ${userDesktops.length} workstation unit${userDesktops.length === 1 ? '' : 's'} assigned to your custody.`}
-                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setIsAddMobileOpen(true)}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-[#7E22CE] hover:bg-[#6B21A8] rounded-lg transition-colors shadow-none"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>Register Mobile</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setIsAddDesktopOpen(true)}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-[#247A51] hover:bg-[#1D6342] rounded-lg transition-colors shadow-none"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>Register Desktop</span>
+                      </button>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => setIsResourceRequestOpen(true)}
-                      className="px-2.5 py-1 text-xs font-semibold text-white bg-[#247A51] hover:bg-[#1D6342] rounded transition-colors"
-                    >
-                      + Request Desktop
-                    </button>
-                  </div>
-                )}
-
-                <DesktopTable
-                  data={userDesktops}
-                  onView={(item) => setDetailDesktop(item)}
-                  onEdit={(item) => setEditDesktop(item)}
-                  onArchive={(item) => setArchiveTarget({ category: 'desktop', id: item.id, tag: item.deviceId })}
-                  onAddNew={() => setIsAddDesktopOpen(true)}
-                  isAdmin={isAdmin}
-                />
-              </div>
-            )}
-
-            {/* VIEW: MOBILES */}
-            {activeNav === 'mobiles' && (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between pb-1">
-                  <div>
-                    <h1 className="text-xl font-bold tracking-tight text-[#172A21]">
-                      {isAdmin ? 'Mobile Client Fleet' : 'My Assigned Mobile Clients'}
-                    </h1>
-                    <p className="text-xs text-[#64748B]">
-                      {isAdmin
-                        ? 'Client mobile devices for automated Wi-Fi interoperability and throughput validation.'
-                        : 'Real test devices and smartphones currently in your custody for test campaigns.'}
-                    </p>
-                  </div>
-                  {isAdmin ? (
-                    <button
-                      type="button"
-                      onClick={() => setIsAddMobileOpen(true)}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-[#247A51] hover:bg-[#1D6342] rounded transition-colors"
-                    >
-                      <Plus className="w-3.5 h-3.5" />
-                      <span>Register Mobile</span>
-                    </button>
                   ) : (
                     <button
                       type="button"
                       onClick={() => setIsResourceRequestOpen(true)}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-[#247A51] hover:bg-[#1D6342] rounded transition-colors"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-[#247A51] hover:bg-[#1D6342] rounded-lg transition-colors shadow-none"
                     >
                       <Plus className="w-3.5 h-3.5" />
-                      <span>Request Mobile</span>
+                      <span>Request Device</span>
                     </button>
                   )}
                 </div>
@@ -513,9 +458,9 @@ export function DashboardLayout({ initialNav = 'dashboard' }: DashboardLayoutPro
                     <div className="flex items-center gap-2">
                       <Smartphone className="w-4 h-4 text-[#247A51]" />
                       <span>
-                        {userMobiles.length === 0
-                          ? 'You currently do not have any mobile client devices assigned in your custody.'
-                          : `Displaying ${userMobiles.length} client device${userMobiles.length === 1 ? '' : 's'} assigned to your custody.`}
+                        {userMobiles.length + userDesktops.length === 0
+                          ? 'You currently do not have any real client devices or workstations assigned in your custody.'
+                          : `Displaying ${userMobiles.length + userDesktops.length} client unit(s) (${userMobiles.length} mobile${userMobiles.length === 1 ? '' : 's'}, ${userDesktops.length} desktop${userDesktops.length === 1 ? '' : 's'}) assigned to your custody.`}
                       </span>
                     </div>
                     <button
@@ -528,12 +473,22 @@ export function DashboardLayout({ initialNav = 'dashboard' }: DashboardLayoutPro
                   </div>
                 )}
 
-                <MobileTable
-                  data={userMobiles}
-                  onView={(item) => setDetailMobile(item)}
-                  onEdit={(item) => setEditMobile(item)}
-                  onArchive={(item) => setArchiveTarget({ category: 'mobile', id: item.id, tag: item.deviceId })}
-                  onAddNew={() => setIsAddMobileOpen(true)}
+                <RealDevicesTable
+                  mobiles={userMobiles}
+                  desktops={userDesktops}
+                  onView={(item, type) => {
+                    if (type === 'mobile') setDetailMobile(item as MobileItem);
+                    else setDetailDesktop(item as DesktopItem);
+                  }}
+                  onEdit={(item, type) => {
+                    if (type === 'mobile') setEditMobile(item as MobileItem);
+                    else setEditDesktop(item as DesktopItem);
+                  }}
+                  onArchive={(id, tag, type) => {
+                    setArchiveTarget({ category: type, id, tag });
+                  }}
+                  onAddMobile={() => setIsAddMobileOpen(true)}
+                  onAddDesktop={() => setIsAddDesktopOpen(true)}
                   isAdmin={isAdmin}
                 />
               </div>

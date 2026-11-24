@@ -24,6 +24,7 @@ export type Permission =
   | 'canCreateAccounts'
   | 'canEditEmployeeRole'
   | 'canDeactivateAccount'
+  | 'canDeleteAccount'
   | 'canManageSettings'
   | 'canExecuteAdminAIOperations';
 

@@ -16,6 +16,7 @@ interface AuthContextType {
   updateUser: (dto: UpdateUserDTO) => Promise<{ success: boolean; error?: string }>;
   deactivateAccount: (userId: string) => Promise<{ success: boolean; error?: string }>;
   activateAccount: (userId: string) => Promise<{ success: boolean; error?: string }>;
+  deleteAccount: (userId: string) => Promise<{ success: boolean; error?: string }>;
   resetUserPassword: (userId: string) => Promise<{ success: boolean; error?: string; resetLink?: string }>;
 }
 
@@ -387,6 +388,56 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return updateUser({ id: userId, account_status: 'active' });
   };
 
+  // Admin: Delete user account permanently
+  const deleteAccount = async (userId: string): Promise<{ success: boolean; error?: string }> => {
+    if (user?.role !== 'admin') {
+      return { success: false, error: 'Unauthorized: Administrator privileges required.' };
+    }
+
+    if (userId === user.id) {
+      return { success: false, error: 'Protection: You cannot delete your own active administrative account.' };
+    }
+
+    try {
+      const res = await fetch(`/api/admin/users?id=${encodeURIComponent(userId)}`, {
+        method: 'DELETE',
+      });
+
+      const data = await res.json().catch(() => null);
+
+      if (!res.ok) {
+        return { success: false, error: data?.error || 'Failed to delete user account.' };
+      }
+    } catch (err: unknown) {
+      console.warn('Network error calling delete user API:', err);
+      return { success: false, error: err instanceof Error ? err.message : 'Network error deleting user.' };
+    }
+
+    // Update local state and persistent storage with functional updater
+    setUsersList((prev) => {
+      const updated = prev.filter((u) => u.id !== userId);
+      try {
+        localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+
+    // Re-sync with server
+    fetch('/api/users')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.users && Array.isArray(data.users)) {
+          setUsersList(data.users);
+          try {
+            localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(data.users));
+          } catch {}
+        }
+      })
+      .catch(() => {});
+
+    return { success: true };
+  };
+
   // Reset user password
   const resetUserPassword = async (
     userId: string
@@ -424,6 +475,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         updateUser,
         deactivateAccount,
         activateAccount,
+        deleteAccount,
         resetUserPassword,
       }}
     >

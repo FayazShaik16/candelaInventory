@@ -65,9 +65,9 @@ export function AppHeader({
         return 'LANforges Testbeds';
       case 'attenuators':
         return 'RF Programmable Attenuators';
-      case 'desktops':
-        return 'Workstations & Desktops';
+      case 'real-devices':
       case 'mobiles':
+      case 'desktops':
         return 'Real Client Devices Fleet';
       case 'chambers':
         return 'RF & Anechoic Chambers';

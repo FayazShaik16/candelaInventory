@@ -23,6 +23,7 @@
 # misc
 .DS_Store
 *.pem
+/public/playwright_screenshots/
 
 # debug
 npm-debug.log*

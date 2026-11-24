@@ -26,6 +26,7 @@ export type NavItemKey =
   | 'dashboard' 
   | 'lanforges' 
   | 'attenuators'
+  | 'real-devices'
   | 'desktops' 
   | 'mobiles' 
   | 'chambers' 
@@ -84,12 +85,15 @@ export function AppSidebar({
       badge: '24',
     },
     {
-      key: 'mobiles' as NavItemKey,
+      key: 'real-devices' as NavItemKey,
       label: isAdmin ? 'Real Devices' : 'My Real Devices',
       icon: Smartphone,
       badge: isAdmin 
-        ? String(metrics.totalMobiles) 
-        : String(mobiles.filter((m) => m.pocId === user?.id && !m.isArchived).length),
+        ? String(metrics.totalMobiles + metrics.totalDesktops) 
+        : String(
+            mobiles.filter((m) => m.pocId === user?.id && !m.isArchived).length +
+            desktops.filter((d) => d.pocId === user?.id && !d.isArchived).length
+          ),
     },
     {
       key: 'chambers' as NavItemKey,
@@ -98,14 +102,6 @@ export function AppSidebar({
       badge: isAdmin 
         ? String(metrics.totalChambers) 
         : String(chambers.filter((c) => c.usedById === user?.id && !c.isArchived).length),
-    },
-    {
-      key: 'desktops' as NavItemKey,
-      label: isAdmin ? 'Desktops' : 'My Desktops',
-      icon: Monitor,
-      badge: isAdmin 
-        ? String(metrics.totalDesktops) 
-        : String(desktops.filter((d) => d.pocId === user?.id && !d.isArchived).length),
     },
   ];
 
@@ -233,7 +229,7 @@ export function AppSidebar({
 
               {categoryNavItems.map((item) => {
                 const Icon = item.icon;
-                const isActive = activeNav === item.key;
+                const isActive = activeNav === item.key || (item.key === 'real-devices' && (activeNav === 'mobiles' || activeNav === 'desktops'));
                 return (
                   <button
                     key={item.key}

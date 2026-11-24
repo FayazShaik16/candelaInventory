@@ -52,8 +52,10 @@ export async function proxy(request: NextRequest) {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         isAuthenticated = true;
-        userRole = user.user_metadata?.role || 'employee';
-        accountStatus = user.user_metadata?.account_status || 'active';
+        const cookieRole = request.cookies.get('candela_role')?.value;
+        const cookieStatus = request.cookies.get('candela_status')?.value;
+        userRole = cookieRole || user.user_metadata?.role || 'employee';
+        accountStatus = cookieStatus || user.user_metadata?.account_status || 'active';
       }
     } catch {
       // Ignore network/auth error during proxy check

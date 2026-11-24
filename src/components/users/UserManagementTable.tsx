@@ -18,7 +18,8 @@ import {
   ChevronRight, 
   ShieldCheck,
   Shield,
-  RotateCcw
+  RotateCcw,
+  Trash2
 } from 'lucide-react';
 
 interface UserManagementTableProps {
@@ -29,6 +30,7 @@ interface UserManagementTableProps {
   onToggleStatus: (user: UserProfile) => void;
   onResetPassword: (user: UserProfile) => void;
   onChangeRole: (user: UserProfile) => void;
+  onDeleteUser: (user: UserProfile) => void;
 }
 
 export function UserManagementTable({
@@ -39,6 +41,7 @@ export function UserManagementTable({
   onToggleStatus,
   onResetPassword,
   onChangeRole,
+  onDeleteUser,
 }: UserManagementTableProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
@@ -445,6 +448,16 @@ export function UserManagementTable({
                             title="Reset Password"
                           >
                             <KeyRound className="w-3.5 h-3.5" />
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => onDeleteUser(u)}
+                            disabled={isSelf}
+                            className="p-1 text-[#DC2626] hover:bg-[#FEF2F2] rounded disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                            title="Delete User Account"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         </div>
                       </td>

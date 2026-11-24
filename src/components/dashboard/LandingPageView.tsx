@@ -38,7 +38,7 @@ type StatusFilter = 'all' | 'In-Use' | 'Available' | 'Under Maintenance';
 export function LandingPageView({ onNavigate, onRequestResource }: LandingPageViewProps) {
   const { user, role } = useAuth();
   const isAdmin = role === 'admin';
-  const { lanforges, mobiles, chambers } = useInventory();
+  const { lanforges, mobiles, desktops, chambers } = useInventory();
   const viewport2Ref = useRef<HTMLDivElement>(null);
 
   // Active chart controls
@@ -62,11 +62,19 @@ export function LandingPageView({ onNavigate, onRequestResource }: LandingPageVi
   const lanforgesMaintenance = lanforges.filter((l) => l.status === 'Under Maintenance' && !l.isArchived).length;
   const lanforgesTotal = lanforges.filter((l) => !l.isArchived).length || 83;
 
-  // 2. Real Devices Distribution (Mobiles Fleet)
-  const realDevicesInUse = mobiles.filter((m) => m.status === 'In-Use' && !m.isArchived).length;
-  const realDevicesAvailable = mobiles.filter((m) => m.status === 'Available' && !m.isArchived).length;
-  const realDevicesMaintenance = mobiles.filter((m) => m.status === 'Under Maintenance' && !m.isArchived).length;
-  const realDevicesTotal = mobiles.filter((m) => !m.isArchived).length || 35;
+  // 2. Real Devices Distribution (Combined Mobiles & Desktops Fleet)
+  const realDevicesInUse =
+    mobiles.filter((m) => m.status === 'In-Use' && !m.isArchived).length +
+    desktops.filter((d) => d.status === 'In-Use' && !d.isArchived).length;
+  const realDevicesAvailable =
+    mobiles.filter((m) => m.status === 'Available' && !m.isArchived).length +
+    desktops.filter((d) => d.status === 'Available' && !d.isArchived).length;
+  const realDevicesMaintenance =
+    mobiles.filter((m) => m.status === 'Under Maintenance' && !m.isArchived).length +
+    desktops.filter((d) => d.status === 'Under Maintenance' && !d.isArchived).length;
+  const realDevicesTotal =
+    mobiles.filter((m) => !m.isArchived).length +
+    desktops.filter((d) => !d.isArchived).length;
 
   // 3. Attenuators Distribution (Candela Programmable RF Banks)
   const attenuatorsInUse = INITIAL_ATTENUATORS.filter((a) => a.status === 'In-Use').length;
@@ -109,14 +117,14 @@ export function LandingPageView({ onNavigate, onRequestResource }: LandingPageVi
     {
       id: 'real_devices',
       label: 'Real Devices',
-      subtitle: 'Mobile Clients',
+      subtitle: 'Mobiles & Desktops',
       icon: Smartphone,
-      navKey: 'mobiles' as NavItemKey,
+      navKey: 'real-devices' as NavItemKey,
       inUse: realDevicesInUse,
       available: realDevicesAvailable,
       maintenance: realDevicesMaintenance,
       total: realDevicesTotal,
-      utilization: Math.round((realDevicesInUse / realDevicesTotal) * 100)
+      utilization: realDevicesTotal > 0 ? Math.round((realDevicesInUse / realDevicesTotal) * 100) : 0
     },
     {
       id: 'attenuators',
@@ -327,7 +335,7 @@ export function LandingPageView({ onNavigate, onRequestResource }: LandingPageVi
 
           {/* BOX 3: REAL DEVICES */}
           <div
-            onClick={() => onNavigate('mobiles')}
+            onClick={() => onNavigate('real-devices')}
             className="group relative aspect-video w-full rounded-2xl lg:rounded-3xl border border-[#E5EBE6] hover:border-[#247A51] overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1 bg-[#173D30]"
           >
             <img
@@ -340,7 +348,7 @@ export function LandingPageView({ onNavigate, onRequestResource }: LandingPageVi
             <div className="absolute top-4 left-4 right-4 flex items-center justify-between">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white/95 backdrop-blur-md text-[#172A21] shadow-sm">
                 <Smartphone className="w-3.5 h-3.5 text-[#7E22CE]" />
-                <span>Client Device Fleet</span>
+                <span>Client Device Fleet (Mobiles & Desktops)</span>
               </span>
               <span className="px-3 py-1 rounded-full text-xs font-bold font-mono bg-[#7E22CE] text-white shadow-md">
                 {realDevicesTotal} Units
@@ -354,7 +362,7 @@ export function LandingPageView({ onNavigate, onRequestResource }: LandingPageVi
                     Real Devices
                   </h3>
                   <p className="text-xs sm:text-sm text-white/90 drop-shadow-sm mt-0.5 line-clamp-1">
-                    Automated smartphones, tablets & reference clients for test campaigns
+                    Automated smartphones, tablets, workstations & client desktops for test campaigns
                   </p>
                   <div className="flex items-center gap-2 mt-2 text-xs text-white/80">
                     <span className="inline-flex items-center gap-1">
@@ -463,8 +471,8 @@ export function LandingPageView({ onNavigate, onRequestResource }: LandingPageVi
         className="min-h-[calc(100vh-5rem)] flex flex-col justify-between py-3 space-y-4"
       >
         {/* Viewport 2 Header with View Mode Switcher and Status Filter Buttons */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-[#E5EBE6] pb-3">
-          <div>
+        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-3.5 border-b border-[#E5EBE6] pb-3">
+          <div className="min-w-0">
             <div className="flex items-center gap-2">
               <span className="text-xs font-semibold px-2 py-0.5 rounded bg-[#EBF4EF] text-[#247A51] border border-[#C2DCD0] uppercase tracking-wider">
                 Telemetry Analytics
@@ -479,9 +487,9 @@ export function LandingPageView({ onNavigate, onRequestResource }: LandingPageVi
             </p>
           </div>
 
-          <div className="flex items-center gap-3 flex-wrap">
+          <div className="flex items-center gap-2.5 sm:gap-3 flex-nowrap shrink-0 overflow-x-auto">
             {/* View Mode Toggle Switcher */}
-            <div className="flex items-center bg-[#F1F5F2] p-1 rounded-xl border border-[#E5EBE6]">
+            <div className="flex items-center bg-[#F1F5F2] p-1 rounded-xl border border-[#E5EBE6] shrink-0">
               <button
                 type="button"
                 onClick={() => setChartView('combined')}
@@ -521,7 +529,7 @@ export function LandingPageView({ onNavigate, onRequestResource }: LandingPageVi
             </div>
 
             {/* Interactive Status Filter Chips */}
-            <div className="flex items-center gap-1.5 bg-white p-1 rounded-xl border border-[#E5EBE6] shadow-sm">
+            <div className="flex items-center gap-1.5 bg-white p-1 rounded-xl border border-[#E5EBE6] shadow-sm shrink-0">
               <button
                 type="button"
                 onClick={() => setStatusFilter('all')}
@@ -599,7 +607,7 @@ export function LandingPageView({ onNavigate, onRequestResource }: LandingPageVi
                       </span>
                       <span className="inline-flex items-center gap-1">
                         <span className="w-2.5 h-2.5 rounded bg-[#EA580C]" />
-                        <span>Maint</span>
+                        <span>Maintenance</span>
                       </span>
                     </div>
                   </div>
@@ -924,11 +932,11 @@ export function LandingPageView({ onNavigate, onRequestResource }: LandingPageVi
                                 <div className="text-xs font-bold font-mono text-[#15803D]">{item.inUse}</div>
                               </div>
                               <div className="p-1.5 rounded-lg bg-[#E0F2FE]/60 border border-[#BAE6FD] text-center">
-                                <div className="text-[10px] font-semibold text-[#0369A1]">Avail</div>
+                                <div className="text-[10px] font-semibold text-[#0369A1] truncate">Available</div>
                                 <div className="text-xs font-bold font-mono text-[#0369A1]">{item.available}</div>
                               </div>
                               <div className="p-1.5 rounded-lg bg-[#FFEDD5]/60 border border-[#FED7AA] text-center">
-                                <div className="text-[10px] font-semibold text-[#C2410C]">Maint</div>
+                                <div className="text-[10px] font-semibold text-[#C2410C] truncate">Maintenance</div>
                                 <div className="text-xs font-bold font-mono text-[#C2410C]">{item.maintenance}</div>
                               </div>
                             </div>
@@ -1243,7 +1251,7 @@ export function LandingPageView({ onNavigate, onRequestResource }: LandingPageVi
                         </div>
 
                         <div className="p-2 rounded-xl bg-[#FFEDD5]/60 border border-[#FED7AA] text-center">
-                          <div className="text-[10px] font-semibold text-[#C2410C]">Maint</div>
+                          <div className="text-[10px] font-semibold text-[#C2410C]">Maintenance</div>
                           <div className="text-base font-bold font-mono text-[#C2410C] mt-0.5">{item.maintenance}</div>
                           <div className="text-[10px] text-[#9A3412]">{Math.round((item.maintenance / item.total) * 100)}%</div>
                         </div>

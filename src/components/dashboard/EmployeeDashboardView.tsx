@@ -186,13 +186,13 @@ export function EmployeeDashboardView({ onViewUnit }: EmployeeDashboardViewProps
     myDesktops.forEach((d) => {
       list.push({
         id: d.id,
-        category: 'desktop',
+        category: 'mobile',
         tag: d.deviceId,
         model: `${d.deviceBrand} ${d.model}`,
         project: d.project || 'Bench Controller',
         location: 'Engineering Bench',
         status: d.status || 'In-Use',
-        details: `${d.deviceBrand} Test Controller`,
+        details: `${d.deviceBrand} Test Desktop`,
       });
     });
 
@@ -444,7 +444,7 @@ export function EmployeeDashboardView({ onViewUnit }: EmployeeDashboardViewProps
         <div className="bg-white p-3.5 rounded-xl border border-[#E5EBE6] flex items-center justify-between">
           <div>
             <span className="text-[11px] font-medium text-[#64748B] block">Real Devices In Custody</span>
-            <span className="text-xl font-bold text-[#172A21] font-mono mt-0.5 block">{myMobiles.length}</span>
+            <span className="text-xl font-bold text-[#172A21] font-mono mt-0.5 block">{myMobiles.length + myDesktops.length}</span>
           </div>
           <div className="p-2 bg-[#F5F3FF] text-[#7C3AED] rounded-lg">
             <Smartphone className="w-4 h-4" />
@@ -511,7 +511,7 @@ export function EmployeeDashboardView({ onViewUnit }: EmployeeDashboardViewProps
                 equipmentFilter === 'mobile' ? 'bg-white text-[#7C3AED] shadow-xs font-semibold' : 'text-[#64748B] hover:text-[#172A21]'
               }`}
             >
-              Real Devices ({myMobiles.length})
+              Real Devices ({myMobiles.length + myDesktops.length})
             </button>
           </div>
         </div>

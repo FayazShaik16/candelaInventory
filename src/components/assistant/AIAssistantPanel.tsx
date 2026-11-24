@@ -319,19 +319,19 @@ export function AIAssistantPanel({
 
   return (
     <>
-      {/* Floating Launcher Icon in Bottom Right */}
+      {/* Floating Launcher Icon in Bottom Right - Compact Circular Button */}
       {!isOpen && (
         <button
           type="button"
           onClick={onToggle}
-          className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-4 py-3 rounded-full bg-[#173D30] hover:bg-[#1E4637] text-white shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 transition-all duration-200 border border-white/20 group cursor-pointer"
+          className="fixed bottom-6 right-6 z-50 flex items-center justify-center w-11 h-11 rounded-full bg-[#173D30] hover:bg-[#1E4637] text-white shadow-lg hover:shadow-xl hover:scale-110 active:scale-95 transition-all duration-200 border border-white/20 group cursor-pointer"
           title="Open AI Assistant"
+          aria-label="Open AI Assistant"
         >
           <div className="relative flex items-center justify-center">
-            <Sparkles className="w-5 h-5 text-emerald-300" />
-            <span className="absolute -top-1 -right-1 w-2 h-2 bg-emerald-400 rounded-full border-2 border-[#173D30]" />
+            <Sparkles className="w-5 h-5 text-emerald-300 group-hover:rotate-12 transition-transform duration-300" />
+            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-400 rounded-full border-2 border-[#173D30]" />
           </div>
-          <span className="text-xs font-semibold tracking-wide">AI Assistant</span>
         </button>
       )}
 

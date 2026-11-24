@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { UserProfile, UserRole, AccountStatus, UpdateUserDTO } from '@/types/auth';
-import { X, Save, AlertCircle, ShieldAlert } from 'lucide-react';
+import { X, Save, AlertCircle, ShieldAlert, Trash2 } from 'lucide-react';
 
 interface EditUserModalProps {
   user: UserProfile | null;
@@ -10,6 +10,7 @@ interface EditUserModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (dto: UpdateUserDTO) => Promise<{ success: boolean; error?: string }>;
+  onDelete?: (user: UserProfile) => void;
 }
 
 export function EditUserModal({
@@ -18,6 +19,7 @@ export function EditUserModal({
   isOpen,
   onClose,
   onSave,
+  onDelete,
 }: EditUserModalProps) {
   const [fullName, setFullName] = useState('');
   const [role, setRole] = useState<UserRole>('employee');
@@ -153,23 +155,39 @@ export function EditUserModal({
             </div>
           </div>
 
-          <div className="pt-3 border-t border-[#E5EBE6] flex items-center justify-end gap-2">
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={isSubmitting}
-              className="px-3 py-1.5 text-xs text-[#64748B] hover:text-[#172A21] border border-[#E5EBE6] rounded"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-[#247A51] hover:bg-[#1D6342] rounded transition-colors disabled:opacity-50"
-            >
-              <Save className="w-3.5 h-3.5" />
-              <span>Save Changes</span>
-            </button>
+          <div className="pt-3 border-t border-[#E5EBE6] flex items-center justify-between gap-2">
+            {!isSelf && onDelete ? (
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  onDelete(user);
+                }}
+                disabled={isSubmitting}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#DC2626] hover:bg-[#FEF2F2] border border-[#FEE2E2] rounded transition-colors"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Delete Account</span>
+              </button>
+            ) : <div />}
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={onClose}
+                disabled={isSubmitting}
+                className="px-3 py-1.5 text-xs text-[#64748B] hover:text-[#172A21] border border-[#E5EBE6] rounded"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-[#247A51] hover:bg-[#1D6342] rounded transition-colors disabled:opacity-50"
+              >
+                <Save className="w-3.5 h-3.5" />
+                <span>Save Changes</span>
+              </button>
+            </div>
           </div>
         </form>
       </div>

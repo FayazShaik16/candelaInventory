@@ -18,6 +18,7 @@ export function UsersView() {
     updateUser,
     deactivateAccount,
     activateAccount,
+    deleteAccount,
     resetUserPassword,
   } = useAuth();
 
@@ -32,12 +33,14 @@ export function UsersView() {
     title: string;
     description: string;
     variant: 'danger' | 'warning' | 'primary';
+    confirmLabel?: string;
     action: () => void;
   }>({
     isOpen: false,
     title: '',
     description: '',
     variant: 'primary',
+    confirmLabel: 'Confirm',
     action: () => {},
   });
 
@@ -97,10 +100,30 @@ export function UsersView() {
       title: 'Issue Password Reset',
       description: `Generate a secure credential reset link for ${target.full_name} (${target.email})?`,
       variant: 'primary',
+      confirmLabel: 'Generate Link',
       action: async () => {
         const res = await resetUserPassword(target.id);
         if (res.success) {
           showToast(`Password reset link generated for ${target.full_name}.`);
+        }
+        setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
+      },
+    });
+  };
+
+  const handleDeleteUser = (target: UserProfile) => {
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Permanently Delete User Account',
+      description: `Are you sure you want to permanently delete the account for ${target.full_name} (${target.email})? All profile records and credentials will be removed. This action cannot be undone.`,
+      variant: 'danger',
+      confirmLabel: 'Delete User',
+      action: async () => {
+        const res = await deleteAccount(target.id);
+        if (res.success) {
+          showToast(`User account for ${target.full_name} has been permanently deleted.`);
+        } else {
+          showToast(`Error: ${res.error || 'Failed to delete user account.'}`);
         }
         setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
       },
@@ -162,6 +185,7 @@ export function UsersView() {
         onToggleStatus={handleToggleStatus}
         onChangeRole={handleChangeRole}
         onResetPassword={handleResetPassword}
+        onDeleteUser={handleDeleteUser}
       />
 
       {/* Modals */}
@@ -182,6 +206,7 @@ export function UsersView() {
         currentUser={currentUser}
         isOpen={Boolean(editingUser)}
         onClose={() => setEditingUser(null)}
+        onDelete={handleDeleteUser}
         onSave={async (dto) => {
           const res = await updateUser(dto);
           if (res.success) {
@@ -206,6 +231,7 @@ export function UsersView() {
         title={confirmDialog.title}
         description={confirmDialog.description}
         variant={confirmDialog.variant}
+        confirmLabel={confirmDialog.confirmLabel}
         onConfirm={confirmDialog.action}
         onCancel={() => setConfirmDialog((prev) => ({ ...prev, isOpen: false }))}
       />
