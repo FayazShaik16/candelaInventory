@@ -292,7 +292,7 @@ export function DashboardLayout({ initialNav = 'dashboard' }: DashboardLayoutPro
             {activeNav === 'dashboard' && (
               <LandingPageView
                 onNavigate={(nav) => setActiveNav(nav)}
-                onRequestResource={() => setIsResourceRequestOpen(true)}
+                onRequestResource={isAdmin ? undefined : () => setIsResourceRequestOpen(true)}
               />
             )}
 
@@ -364,7 +364,7 @@ export function DashboardLayout({ initialNav = 'dashboard' }: DashboardLayoutPro
 
             {/* VIEW: ATTENUATORS */}
             {activeNav === 'attenuators' && (
-              <AttenuatorsView onRequestResource={() => setIsResourceRequestOpen(true)} />
+              <AttenuatorsView onRequestResource={isAdmin ? undefined : () => setIsResourceRequestOpen(true)} />
             )}
 
             {/* VIEW: DESKTOPS */}

@@ -37,6 +37,7 @@ type StatusFilter = 'all' | 'In-Use' | 'Available' | 'Under Maintenance';
 
 export function LandingPageView({ onNavigate, onRequestResource }: LandingPageViewProps) {
   const { user, role } = useAuth();
+  const isAdmin = role === 'admin';
   const { lanforges, mobiles, chambers } = useInventory();
   const viewport2Ref = useRef<HTMLDivElement>(null);
 
@@ -196,7 +197,7 @@ export function LandingPageView({ onNavigate, onRequestResource }: LandingPageVi
               <span>{currentDateStr}</span>
             </div>
 
-            {onRequestResource && (
+            {!isAdmin && onRequestResource && (
               <button
                 type="button"
                 onClick={onRequestResource}
@@ -1282,7 +1283,7 @@ export function LandingPageView({ onNavigate, onRequestResource }: LandingPageVi
           </div>
 
           <div className="flex items-center gap-2 self-end sm:self-auto">
-            {onRequestResource && (
+            {!isAdmin && onRequestResource && (
               <button
                 type="button"
                 onClick={onRequestResource}

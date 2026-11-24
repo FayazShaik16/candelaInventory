@@ -296,7 +296,7 @@ export function AttenuatorsView({ onRequestResource }: AttenuatorsViewProps) {
           </p>
         </div>
 
-        {onRequestResource && (
+        {!isAdmin && onRequestResource && (
           <button
             type="button"
             onClick={onRequestResource}
