@@ -29,6 +29,65 @@ export function ChatMessage({
     }
   };
 
+  const renderInline = (line: string): React.ReactNode[] => {
+    const tokens = line.split(/(\*\*[^*]+\*\*|`[^`]+`|\*[^*]+\*)/g);
+    return tokens.map((tok, i) => {
+      if (tok.startsWith('**') && tok.endsWith('**') && tok.length > 4) {
+        return <strong key={i} className="font-semibold text-inherit">{tok.slice(2, -2)}</strong>;
+      }
+      if (tok.startsWith('`') && tok.endsWith('`') && tok.length > 2) {
+        return (
+          <code key={i} className="px-1 py-0.5 rounded bg-black/5 font-mono text-[11px]">
+            {tok.slice(1, -1)}
+          </code>
+        );
+      }
+      if (tok.startsWith('*') && tok.endsWith('*') && tok.length > 2) {
+        return <em key={i} className="italic">{tok.slice(1, -1)}</em>;
+      }
+      return <React.Fragment key={i}>{tok.replace(/\*\*/g, '')}</React.Fragment>;
+    });
+  };
+
+  const renderFormattedText = (raw: string) => {
+    const lines = raw.split('\n');
+    return (
+      <div className="space-y-1.5 leading-relaxed">
+        {lines.map((line, idx) => {
+          const trimmed = line.trim();
+          if (!trimmed) {
+            return <div key={idx} className="h-1" />;
+          }
+          if (/^#{1,3}\s+/.test(trimmed)) {
+            return (
+              <div key={idx} className="font-semibold text-[#172A21] pt-0.5">
+                {renderInline(trimmed.replace(/^#{1,3}\s+/, ''))}
+              </div>
+            );
+          }
+          if (/^[•\-*]\s+/.test(trimmed)) {
+            return (
+              <div key={idx} className="flex items-start gap-2 pl-1">
+                <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-[#247A51] flex-shrink-0" />
+                <span>{renderInline(trimmed.replace(/^[•\-*]\s+/, ''))}</span>
+              </div>
+            );
+          }
+          const numMatch = trimmed.match(/^(\d+)\.\s+(.*)$/);
+          if (numMatch) {
+            return (
+              <div key={idx} className="flex items-start gap-2 pl-1">
+                <span className="font-semibold text-[#247A51] min-w-[14px]">{numMatch[1]}.</span>
+                <span>{renderInline(numMatch[2])}</span>
+              </div>
+            );
+          }
+          return <p key={idx}>{renderInline(line)}</p>;
+        })}
+      </div>
+    );
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'Available':
@@ -39,13 +98,13 @@ export function ChatMessage({
         );
       case 'Under Maintenance':
         return (
-          <span className="px-1.5 py-0.5 rounded text-[9px] font-medium bg-[#FFFBEB] text-[#D97706] border border-[#FEF3C7]">
+          <span className="px-1.5 py-0.5 rounded text-[9px] font-medium bg-[#FEF2F2] text-[#DC2626] border border-[#FEE2E2]">
             Maintenance
           </span>
         );
       default:
         return (
-          <span className="px-1.5 py-0.5 rounded text-[9px] font-medium bg-[#EFF6FF] text-[#2563EB] border border-[#DBEAFE]">
+          <span className="px-1.5 py-0.5 rounded text-[9px] font-medium bg-[#EFF6FF] text-[#0284C7] border border-[#DBEAFE]">
             In-Use
           </span>
         );
@@ -79,7 +138,7 @@ export function ChatMessage({
             : 'bg-[#FFFFFF] text-[#172A21] border-[#E5EBE6] rounded-tl-none shadow-none'
         }`}
       >
-        <p className="whitespace-pre-wrap">{message.text}</p>
+        {renderFormattedText(message.text)}
 
         {/* Query Results List */}
         {message.queryResults && message.queryResults.length > 0 && (

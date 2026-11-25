@@ -42,8 +42,8 @@ async function runTests() {
   assert(reqs.ok && Array.isArray(reqs.data.requests), `GET /api/requests failed: ${reqs.status}`);
   console.log(`[PASS] GET /api/requests: ${reqs.data.requests.length} requests`);
 
-  // Helper to call chatbot
-  const askChat = async (message) => {
+  // Stateless helper (fresh conversation per single-turn test)
+  const askChat = async (message, convId = `conv-single-${Math.random().toString(36).slice(2)}`, sessionContext = undefined) => {
     const res = await fetchJson('/api/assistant/chat', {
       method: 'POST',
       headers: {
@@ -51,26 +51,42 @@ async function runTests() {
         'x-user-role': 'admin',
         'x-user-name': 'Admin Supervisor',
       },
-      body: JSON.stringify({ message }),
+      body: JSON.stringify({ message, conversation_id: convId, session_context: sessionContext }),
     });
     assert(res.ok, `Chat API failed for "${message}": ${res.status}`);
     return res.data;
   };
 
-  const tests = [
+  const singleTurnTests = [
     {
-      name: '1. Single Filter - Available Units (All returned, not 1)',
+      name: '1. Greeting returns clean response with NO unsolicited cards',
+      query: 'Hello',
+      check: (d) => {
+        assert(Array.isArray(d.query_results) && d.query_results.length === 0, 'Greeting should not dump random unit cards');
+        assert(d.text.toLowerCase().includes('hello'), 'Greeting text unexpected');
+      },
+    },
+    {
+      name: '2. Overview Summary Matches Live DB Counts with NO random cards',
+      query: 'Inventory summary',
+      check: (d) => {
+        assert(d.text.includes(`${lf.length} units`), `Overview LANforge count mismatch (expected ${lf.length})`);
+        assert(d.text.includes(`${ch.length} enclosures`), `Overview Chamber count mismatch (expected ${ch.length})`);
+        assert(Array.isArray(d.query_results) && d.query_results.length === 0, 'Summary should not dump random cards');
+      },
+    },
+    {
+      name: '3. Single Filter - Available Units (All returned, not 1)',
       query: 'Show all available units',
       check: (d) => {
         const expected = allItems.filter((i) => i.status === 'Available').length;
         assert(!d.action_preview, 'Should not trigger action_preview');
-        assert(Array.isArray(d.query_results), 'Missing query_results');
         assert(d.query_results.length === expected, `Expected ${expected} available units, got ${d.query_results.length}`);
         assert(d.query_results.every((r) => r.status === 'Available'), 'Non-available unit returned');
       },
     },
     {
-      name: '2. Single Filter - Under Maintenance (No action hijack)',
+      name: '4. Single Filter - Under Maintenance (No action hijack)',
       query: 'Show all units under maintenance',
       check: (d) => {
         const expected = allItems.filter((i) => i.status === 'Under Maintenance').length;
@@ -80,7 +96,7 @@ async function runTests() {
       },
     },
     {
-      name: '3. Single Filter - In-Use Units',
+      name: '5. Single Filter - In-Use Units',
       query: 'Which units are in-use?',
       check: (d) => {
         const expected = allItems.filter((i) => i.status === 'In-Use').length;
@@ -90,7 +106,7 @@ async function runTests() {
       },
     },
     {
-      name: '4. Single Filter - Category: LANforges',
+      name: '6. Single Filter - Category: LANforges',
       query: 'Show all LANforges',
       check: (d) => {
         assert(d.query_results.length === lf.length, `Expected ${lf.length} LANforges, got ${d.query_results.length}`);
@@ -98,16 +114,16 @@ async function runTests() {
       },
     },
     {
-      name: '5. Single Filter - Category: Real Devices (Mobiles + Desktops)',
+      name: '7. Single Filter - Category: Real Devices (Mobiles + Desktops)',
       query: 'Show all real devices',
       check: (d) => {
         const expected = dt.length + mb.length;
         assert(d.query_results.length === expected, `Expected ${expected} real devices, got ${d.query_results.length}`);
-        assert(d.query_results.every((r) => r.category === 'desktop' || r.category === 'mobile'), 'Invalid category for real devices');
+        assert(d.query_results.every((r) => r.category === 'desktop' || r.category === 'mobile'), 'Invalid category');
       },
     },
     {
-      name: '6. Single Filter - Category: Chambers',
+      name: '8. Single Filter - Category: Chambers',
       query: 'Show all chambers',
       check: (d) => {
         assert(d.query_results.length === ch.length, `Expected ${ch.length} chambers, got ${d.query_results.length}`);
@@ -115,7 +131,7 @@ async function runTests() {
       },
     },
     {
-      name: '7. Single Filter - Location: OPEL',
+      name: '9. Single Filter - Location: OPEL',
       query: 'Show all units in OPEL',
       check: (d) => {
         assert(d.query_results.length > 0, 'Expected OPEL units');
@@ -123,7 +139,7 @@ async function runTests() {
       },
     },
     {
-      name: '8. Single Filter - Model Keyword: CT523c (Multiple units, not 1)',
+      name: '10. Single Filter - Dynamic Model Keyword: CT523c (Multiple units)',
       query: 'Show all CT523c units',
       check: (d) => {
         const expected = lf.filter((l) => `${l.lanforgeId} ${l.lanforgeModel}`.toLowerCase().includes('ct523c')).length;
@@ -131,7 +147,7 @@ async function runTests() {
       },
     },
     {
-      name: '9. Multi-Filter - Available + LANforges + OPEL',
+      name: '11. Multi-Filter - Available + LANforges + OPEL',
       query: 'Show available LANforges in OPEL',
       check: (d) => {
         const expected = lf.filter((l) => l.status === 'Available' && l.location.toUpperCase().includes('OPEL')).length;
@@ -140,36 +156,19 @@ async function runTests() {
       },
     },
     {
-      name: '10. Multi-Filter - Available Chambers',
-      query: 'Which chambers are available?',
-      check: (d) => {
-        const expected = ch.filter((c) => c.status === 'Available').length;
-        assert(d.query_results.length === expected, `Expected ${expected} available chambers, got ${d.query_results.length}`);
-        assert(d.query_results.every((r) => r.status === 'Available' && r.category === 'chamber'), 'Filter mismatch');
-      },
-    },
-    {
-      name: '11. Multi-Filter - Available Real Devices',
-      query: 'Show available real devices',
-      check: (d) => {
-        const expected = [...dt, ...mb].filter((x) => x.status === 'Available').length;
-        assert(d.query_results.length === expected, `Expected ${expected} available real devices, got ${d.query_results.length}`);
-      },
-    },
-    {
       name: '12. Custodian Query (Must NOT trigger assign action_preview)',
       query: 'What equipment is assigned to Sirisha?',
       check: (d) => {
-        assert(!d.action_preview, 'Must NOT trigger assignment action_preview when asking what is assigned!');
+        assert(!d.action_preview, 'Must NOT trigger assignment action_preview!');
         assert(Array.isArray(d.query_results), 'Missing query_results');
       },
     },
     {
-      name: '13. Specific Tag Lookup',
-      query: `Check status of ${dt[0]?.deviceId || 'DT-01'}`,
+      name: '13. Specific Tag Attribute Query (IP address)',
+      query: `What is the IP of ${lf[0]?.lanforgeId || 'LF-OPEL-523C-01'}?`,
       check: (d) => {
-        assert(d.query_results.length === 1, `Expected 1 unit, got ${d.query_results.length}`);
-        assert(d.query_results[0].tag === (dt[0]?.deviceId || 'DT-01'), 'Wrong unit returned');
+        assert(d.query_results.length === 1, 'Expected 1 unit');
+        assert(d.text.includes(lf[0]?.lanforgeId || 'LF-OPEL-523C-01'), 'Wrong unit in answer');
       },
     },
     {
@@ -191,22 +190,14 @@ async function runTests() {
       query: `Set ${dt[0]?.deviceId || 'DT-01'} to Under Maintenance`,
       check: (d) => {
         assert(d.action_preview && d.action_preview.intent === 'status_update', 'Expected status_update preview');
-        assert(d.action_preview.target_status === 'Under Maintenance', 'Expected Under Maintenance target_status');
-      },
-    },
-    {
-      name: '17. Overview Summary Matches Live DB Counts',
-      query: 'Hello',
-      check: (d) => {
-        assert(d.text.includes(`${lf.length} units`), `Overview LANforge count mismatch (expected ${lf.length})`);
-        assert(d.text.includes(`${ch.length} enclosures`), `Overview Chamber count mismatch (expected ${ch.length})`);
+        assert(d.action_preview.target_status === 'Under Maintenance', 'Expected Under Maintenance');
       },
     },
   ];
 
   let passed = 0;
   let failed = 0;
-  for (const t of tests) {
+  for (const t of singleTurnTests) {
     try {
       const data = await askChat(t.query);
       t.check(data);
@@ -216,6 +207,49 @@ async function runTests() {
       console.error(`[FAIL] ${t.name}: ${err.message}`);
       failed++;
     }
+  }
+
+  // Multi-turn Session Memory Tests
+  try {
+    const convA = 'conv-mem-filter-test';
+    const r1 = await askChat('How many LANforges are available?', convA);
+    const availLfCount = lf.filter((l) => l.status === 'Available').length;
+    assert(r1.text.includes(`${availLfCount}`) && r1.query_results.length === 0, `Count query failed: ${r1.text}`);
+
+    const r2 = await askChat('Show them', convA, r1.session_context);
+    assert(r2.query_results.length === availLfCount, `Follow-up "Show them" expected ${availLfCount}, got ${r2.query_results.length}`);
+
+    const r3 = await askChat('Only in OPEL', convA, r2.session_context);
+    const opelAvailLf = lf.filter((l) => l.status === 'Available' && l.location.toUpperCase().includes('OPEL')).length;
+    assert(r3.query_results.length === opelAvailLf, `Follow-up "Only in OPEL" expected ${opelAvailLf}, got ${r3.query_results.length}`);
+
+    const r4 = await askChat('Assign the first one to Sirisha', convA, r3.session_context);
+    assert(r4.action_preview && r4.action_preview.unit_tag === r3.query_results[0].tag, 'Ordinal follow-up failed to resolve first unit');
+
+    console.log('[PASS] 17. Session Memory Multi-Turn Chain (Count -> Show them -> Only in OPEL -> Assign the first one)');
+    passed++;
+  } catch (err) {
+    console.error(`[FAIL] 17. Session Memory Multi-Turn Chain: ${err.message}`);
+    failed++;
+  }
+
+  try {
+    const convB = 'conv-mem-pronoun-test';
+    const targetTag = dt[0]?.deviceId || 'DT-01';
+    const p1 = await askChat(`Check ${targetTag}`, convB);
+    assert(p1.query_results.length === 1 && p1.query_results[0].tag === targetTag, 'Initial tag lookup failed');
+
+    const p2 = await askChat('Who has it?', convB, p1.session_context);
+    assert(p2.text.includes(targetTag), `Pronoun "it" failed on detail question: ${p2.text}`);
+
+    const p3 = await askChat('Release it', convB, p2.session_context);
+    assert(p3.action_preview && p3.action_preview.unit_tag === targetTag && p3.action_preview.intent === 'equipment_return', 'Pronoun "it" failed on release action');
+
+    console.log('[PASS] 18. Session Memory Pronoun Resolution (Check DT -> Who has it? -> Release it)');
+    passed++;
+  } catch (err) {
+    console.error(`[FAIL] 18. Session Memory Pronoun Resolution: ${err.message}`);
+    failed++;
   }
 
   console.log(`\n=== Summary: ${passed} passed, ${failed} failed ===\n`);

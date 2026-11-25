@@ -48,6 +48,8 @@ export function AIAssistantPanel({
   const [isExpanded, setIsExpanded] = useState(false);
   const [engineStatus, setEngineStatus] = useState<'connected' | 'local'>('local');
   const [activeTokenMap, setActiveTokenMap] = useState<Record<string, string>>({});
+  const [conversationId, setConversationId] = useState<string>(() => `conv-${Date.now().toString(36)}`);
+  const [sessionContext, setSessionContext] = useState<Record<string, any>>({});
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Check AI Assistant Engine Health
@@ -77,17 +79,6 @@ export function AIAssistantPanel({
     }
   }, [messages, isTyping]);
 
-  const suggestedPrompts = [
-    {
-      label: 'Assign LF-01 to Sirisha',
-      query: 'Assign LF-OPEL-523C-01 to Sirisha for Netgear project.',
-    },
-    {
-      label: 'Check Available Units',
-      query: 'Show me all available hardware units ready for assignment.',
-    },
-  ];
-
   const handleSendMessage = async (text: string) => {
     const userMsgId = `msg-${Date.now()}`;
     const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -99,6 +90,12 @@ export function AIAssistantPanel({
       text,
     };
 
+    const nextHistory = [...messages, userMsg].slice(-12).map((m) => ({
+      sender: m.sender,
+      text: m.text,
+      resultTags: (m.queryResults || []).map((r) => r.tag),
+    }));
+
     setMessages((prev) => [...prev, userMsg]);
     setIsTyping(true);
 
@@ -109,16 +106,22 @@ export function AIAssistantPanel({
           'Content-Type': 'application/json',
           'x-user-role': currentUserRole || 'admin',
           'x-user-name': user?.full_name || 'Admin Supervisor',
-          'x-user-id': user?.id || '6a098c6e-86e4-4e1b-a77a-d7bdff7da475',
+          'x-user-id': user?.id || '',
         },
         body: JSON.stringify({
           message: text,
-          conversation_id: 'conv-active',
+          conversation_id: conversationId,
+          history: nextHistory,
+          session_context: sessionContext,
         }),
       });
 
       const data = await response.json();
       setIsTyping(false);
+
+      if (data && data.session_context) {
+        setSessionContext(data.session_context);
+      }
 
       if (data && data.text) {
         let actionPreview = undefined;
@@ -202,7 +205,7 @@ export function AIAssistantPanel({
           'Content-Type': 'application/json',
           'x-user-role': currentUserRole || 'admin',
           'x-user-name': user?.full_name || 'Admin Supervisor',
-          'x-user-id': user?.id || '6a098c6e-86e4-4e1b-a77a-d7bdff7da475',
+          'x-user-id': user?.id || '',
         },
         body: JSON.stringify({
           confirmation_token: token,
@@ -315,6 +318,8 @@ export function AIAssistantPanel({
 
   const handleResetChat = () => {
     setMessages(initialMessages);
+    setSessionContext({});
+    setConversationId(`conv-${Date.now().toString(36)}`);
   };
 
   return (
@@ -413,20 +418,6 @@ export function AIAssistantPanel({
                 </div>
               </div>
             )}
-          </div>
-
-          {/* Clean Quick Suggestions (Only 1-2 chips) */}
-          <div className="px-3 py-1.5 bg-[#FFFFFF] border-t border-[#E2E8F0] flex items-center gap-1.5 overflow-x-auto flex-shrink-0">
-            {suggestedPrompts.map((p, idx) => (
-              <button
-                key={idx}
-                type="button"
-                onClick={() => handleSendMessage(p.query)}
-                className="text-[11px] text-[#1E293B] bg-[#F1F5F9] hover:bg-[#EBF4EF] hover:text-[#247A51] px-2.5 py-1 rounded-full border border-[#E2E8F0] transition-colors truncate whitespace-nowrap text-left"
-              >
-                {p.label}
-              </button>
-            ))}
           </div>
 
           {/* Chat Input */}
