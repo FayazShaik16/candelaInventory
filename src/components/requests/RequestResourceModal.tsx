@@ -17,10 +17,8 @@ import {
   Cable, 
   AlertCircle, 
   CheckCircle2, 
-  Loader2, 
-  Calendar,
-  Layers,
-  FolderKanban
+  Loader2,
+  Info
 } from 'lucide-react';
 
 interface RequestResourceModalProps {
@@ -150,18 +148,29 @@ export function RequestResourceModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-none animate-in fade-in duration-150">
       <div 
-        className="w-full max-w-xl bg-[#FFFFFF] border border-[#E5EBE6] rounded-xl shadow-xl overflow-hidden flex flex-col max-h-[92vh]"
+        className="w-full max-w-3xl bg-[#FFFFFF] border border-[#E5EBE6] rounded-xl shadow-xl overflow-hidden flex flex-col max-h-[92vh]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
-        <div className="px-5 py-4 border-b border-[#E5EBE6] flex items-center justify-between bg-[#F9FAF9]">
+        <div className="px-6 py-4 border-b border-[#E5EBE6] flex items-center justify-between bg-[#F9FAF9]">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-[#247A51] text-white flex items-center justify-center font-bold text-xs shadow-sm">
               <Send className="w-4 h-4" />
             </div>
-            <div>
+            <div className="flex items-center gap-2">
               <h2 className="text-sm font-bold text-[#172A21]">Request Hardware & Resources</h2>
-              <p className="text-[11px] text-[#64748B]">Request testbeds, client fleet, attenuators, or chambers for your project</p>
+              <div className="relative group/info">
+                <button
+                  type="button"
+                  aria-label="Request form information"
+                  className="w-5 h-5 rounded-full flex items-center justify-center text-[#64748B] hover:text-[#247A51] hover:bg-[#EBF4EF] transition-colors"
+                >
+                  <Info className="w-3.5 h-3.5" />
+                </button>
+                <div className="pointer-events-none opacity-0 group-hover/info:opacity-100 group-focus-within/info:opacity-100 transition-opacity duration-150 absolute left-0 top-full mt-1.5 w-72 p-2.5 rounded-lg bg-[#172A21] text-white text-[11px] leading-relaxed shadow-lg z-30">
+                  Request testbeds, client devices, attenuators, or chambers for your project. Urgent requests are flagged directly for admin review.
+                </div>
+              </div>
             </div>
           </div>
           <button 
@@ -174,7 +183,7 @@ export function RequestResourceModal({
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit} className="p-5 overflow-y-auto space-y-4 text-xs">
+        <form onSubmit={handleSubmit} className="p-6 overflow-y-auto space-y-5 text-xs">
           {errorMsg && (
             <div className="p-2.5 bg-[#FEF2F2] border border-[#FEE2E2] rounded-lg text-xs text-[#DC2626] flex items-start gap-2">
               <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
@@ -191,10 +200,10 @@ export function RequestResourceModal({
 
           {/* Step 1: Select Resource Category */}
           <div>
-            <label className="block text-xs font-semibold text-[#172A21] mb-1.5">
-              1. What type of equipment do you need? *
+            <label className="block text-xs font-semibold text-[#172A21] mb-2">
+              Equipment Category *
             </label>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
               {categories.map((cat) => {
                 const Icon = cat.icon;
                 const isSelected = resourceCategory === cat.key;
@@ -202,32 +211,30 @@ export function RequestResourceModal({
                   <button
                     key={cat.key}
                     type="button"
+                    title={cat.desc}
                     onClick={() => {
                       setResourceCategory(cat.key);
                       setPreferredAssetTag('');
                     }}
-                    className={`p-2.5 rounded-lg border text-left transition-all flex flex-col justify-between ${
+                    className={`px-3 py-2.5 rounded-lg border text-left transition-all flex items-center gap-2 ${
                       isSelected
                         ? 'border-[#247A51] bg-[#EBF4EF] text-[#247A51] ring-1 ring-[#247A51]'
                         : 'border-[#E5EBE6] bg-white text-[#172A21] hover:bg-[#F9FAF9]'
                     }`}
                   >
-                    <div className="flex items-center gap-1.5 mb-1">
-                      <Icon className={`w-3.5 h-3.5 ${isSelected ? 'text-[#247A51]' : 'text-[#64748B]'}`} />
-                      <span className="font-bold text-xs truncate">{cat.label}</span>
-                    </div>
-                    <span className="text-[10px] text-[#64748B] leading-tight line-clamp-1">{cat.desc}</span>
+                    <Icon className={`w-4 h-4 flex-shrink-0 ${isSelected ? 'text-[#247A51]' : 'text-[#64748B]'}`} />
+                    <span className="font-semibold text-xs truncate">{cat.label}</span>
                   </button>
                 );
               })}
             </div>
           </div>
 
-          {/* Step 2: Preferred Unit or Custom Specs */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {/* Step 2: Preferred Unit & Target Specs */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-medium text-[#172A21] mb-1">
-                Preferred Available Unit (Optional)
+              <label className="block text-xs font-medium text-[#172A21] mb-1.5">
+                Preferred Available Unit <span className="text-[#64748B] font-normal">({availableUnits.length} available)</span>
               </label>
               <select
                 value={preferredAssetTag}
@@ -238,7 +245,7 @@ export function RequestResourceModal({
                     setTargetSpecs(matching.model);
                   }
                 }}
-                className="w-full px-2.5 py-1.5 bg-[#FFFFFF] border border-[#E5EBE6] rounded-md text-xs text-[#172A21] focus:outline-none focus:border-[#247A51]"
+                className="w-full h-9 px-3 bg-[#FFFFFF] border border-[#E5EBE6] rounded-lg text-xs text-[#172A21] focus:outline-none focus:border-[#247A51]"
               >
                 <option value="">Any available unit matching specs</option>
                 {availableUnits.map((u) => (
@@ -247,13 +254,10 @@ export function RequestResourceModal({
                   </option>
                 ))}
               </select>
-              <span className="text-[10px] text-[#64748B] mt-0.5 block">
-                {availableUnits.length} units currently in available pool
-              </span>
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-[#172A21] mb-1">
+              <label className="block text-xs font-medium text-[#172A21] mb-1.5">
                 Target Model / Specifications
               </label>
               <input
@@ -261,18 +265,15 @@ export function RequestResourceModal({
                 value={targetSpecs}
                 onChange={(e) => setTargetSpecs(e.target.value)}
                 placeholder="e.g. Wi-Fi 7 CT523c / 4-radio / Pixel 9 Pro"
-                className="w-full px-2.5 py-1.5 bg-[#FFFFFF] border border-[#E5EBE6] rounded-md text-xs text-[#172A21] focus:outline-none focus:border-[#247A51]"
+                className="w-full h-9 px-3 bg-[#FFFFFF] border border-[#E5EBE6] rounded-lg text-xs text-[#172A21] focus:outline-none focus:border-[#247A51]"
               />
-              <span className="text-[10px] text-[#64748B] mt-0.5 block">
-                Specify radio count, chipset, or hardware standard
-              </span>
             </div>
           </div>
 
-          {/* Step 3: Project & Purpose */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {/* Step 3: Project, Duration & Priority */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <label className="block text-xs font-medium text-[#172A21] mb-1">
+              <label className="block text-xs font-medium text-[#172A21] mb-1.5">
                 Project / Test Campaign *
               </label>
               <input
@@ -281,8 +282,8 @@ export function RequestResourceModal({
                 list="req-project-options"
                 value={project}
                 onChange={(e) => setProject(e.target.value)}
-                placeholder="e.g. Jio, Chamberlain, SpaceX, Netgear"
-                className="w-full px-2.5 py-1.5 bg-[#FFFFFF] border border-[#E5EBE6] rounded-md text-xs text-[#172A21] focus:outline-none focus:border-[#247A51]"
+                placeholder="e.g. Jio, Netgear, SpaceX"
+                className="w-full h-9 px-3 bg-[#FFFFFF] border border-[#E5EBE6] rounded-lg text-xs text-[#172A21] focus:outline-none focus:border-[#247A51]"
               />
               <datalist id="req-project-options">
                 {projectOptions.map((p) => (
@@ -292,74 +293,69 @@ export function RequestResourceModal({
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-[#172A21] mb-1">
+              <label className="block text-xs font-medium text-[#172A21] mb-1.5">
                 Required Duration *
               </label>
               <select
                 value={duration}
                 onChange={(e) => setDuration(e.target.value)}
-                className="w-full px-2.5 py-1.5 bg-[#FFFFFF] border border-[#E5EBE6] rounded-md text-xs text-[#172A21] focus:outline-none focus:border-[#247A51]"
+                className="w-full h-9 px-3 bg-[#FFFFFF] border border-[#E5EBE6] rounded-lg text-xs text-[#172A21] focus:outline-none focus:border-[#247A51]"
               >
-                <option value="3 Days">3 Days (Quick test / validation)</option>
-                <option value="1 Week">1 Week (Sprint milestone)</option>
-                <option value="2 Weeks">2 Weeks (Standard sprint)</option>
-                <option value="1 Month">1 Month (Comprehensive testing)</option>
-                <option value="Ongoing">Ongoing (Long-term testbed setup)</option>
+                <option value="3 Days">3 Days</option>
+                <option value="1 Week">1 Week</option>
+                <option value="2 Weeks">2 Weeks</option>
+                <option value="1 Month">1 Month</option>
+                <option value="Ongoing">Ongoing</option>
               </select>
-            </div>
-          </div>
-
-          {/* Purpose & Priority */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div className="sm:col-span-2">
-              <label className="block text-xs font-medium text-[#172A21] mb-1">
-                Testing Purpose & Objectives *
-              </label>
-              <textarea
-                required
-                rows={2}
-                value={purpose}
-                onChange={(e) => setPurpose(e.target.value)}
-                placeholder="Briefly describe what test scripts, roaming benchmarks, or throughput validations will be run..."
-                className="w-full px-2.5 py-1.5 bg-[#FFFFFF] border border-[#E5EBE6] rounded-md text-xs text-[#172A21] focus:outline-none focus:border-[#247A51] resize-none"
-              />
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-[#172A21] mb-1">
+              <label className="block text-xs font-medium text-[#172A21] mb-1.5">
                 Priority Level
               </label>
               <select
                 value={priority}
                 onChange={(e) => setPriority(e.target.value as RequestPriority)}
-                className="w-full px-2.5 py-1.5 bg-[#FFFFFF] border border-[#E5EBE6] rounded-md text-xs text-[#172A21] focus:outline-none focus:border-[#247A51]"
+                className="w-full h-9 px-3 bg-[#FFFFFF] border border-[#E5EBE6] rounded-lg text-xs text-[#172A21] focus:outline-none focus:border-[#247A51]"
               >
                 <option value="Standard">Standard</option>
                 <option value="High Priority">High Priority</option>
-                <option value="Urgent">Urgent (Customer Blocker)</option>
+                <option value="Urgent">Urgent (Blocker)</option>
               </select>
-              <span className="text-[10px] text-[#64748B] mt-1 block">
-                Urgent requests are flagged directly on admin review
-              </span>
             </div>
           </div>
 
-          {/* Additional Notes */}
+          {/* Step 4: Testing Purpose */}
           <div>
-            <label className="block text-xs font-medium text-[#172A21] mb-1">
+            <label className="block text-xs font-medium text-[#172A21] mb-1.5">
+              Testing Purpose & Objectives *
+            </label>
+            <textarea
+              required
+              rows={2}
+              value={purpose}
+              onChange={(e) => setPurpose(e.target.value)}
+              placeholder="Briefly describe test scripts, roaming benchmarks, or throughput validations..."
+              className="w-full px-3 py-2 bg-[#FFFFFF] border border-[#E5EBE6] rounded-lg text-xs text-[#172A21] focus:outline-none focus:border-[#247A51] resize-none"
+            />
+          </div>
+
+          {/* Step 5: Additional Notes */}
+          <div>
+            <label className="block text-xs font-medium text-[#172A21] mb-1.5">
               Special Setup Requirements / Lab Bay Notes (Optional)
             </label>
             <input
               type="text"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="e.g. Need RF cables with SMA connectors, or specific firmware 5.4.8"
-              className="w-full px-2.5 py-1.5 bg-[#FFFFFF] border border-[#E5EBE6] rounded-md text-xs text-[#172A21] focus:outline-none focus:border-[#247A51]"
+              placeholder="e.g. Need RF cables with SMA connectors, or firmware 5.4.8"
+              className="w-full h-9 px-3 bg-[#FFFFFF] border border-[#E5EBE6] rounded-lg text-xs text-[#172A21] focus:outline-none focus:border-[#247A51]"
             />
           </div>
 
           {/* Footer Actions */}
-          <div className="pt-3 border-t border-[#E5EBE6] flex items-center justify-between">
+          <div className="pt-4 border-t border-[#E5EBE6] flex items-center justify-between">
             <span className="text-[11px] text-[#64748B]">
               Submitting as: <strong className="text-[#172A21]">{user?.full_name || 'Candela Engineer'}</strong>
             </span>
