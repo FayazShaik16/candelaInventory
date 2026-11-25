@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { StatusBadge } from '../inventory/shared/StatusBadge';
 import { 
   Sliders, 
   Search, 
@@ -408,18 +409,7 @@ export function AttenuatorsView({ onRequestResource }: AttenuatorsViewProps) {
                     <div className="text-[11px] text-[#64748B]">{att.attenuationRange} (Step: {att.stepSize})</div>
                   </td>
                   <td className="py-3 px-3 whitespace-nowrap">
-                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold ${
-                      att.status === 'In-Use' 
-                        ? 'bg-[#DCFCE7] text-[#15803D]' 
-                        : att.status === 'Available'
-                        ? 'bg-[#E0F2FE] text-[#0369A1]'
-                        : 'bg-[#FFEDD5] text-[#C2410C]'
-                    }`}>
-                      <span className={`w-1.5 h-1.5 rounded-full ${
-                        att.status === 'In-Use' ? 'bg-[#15803D]' : att.status === 'Available' ? 'bg-[#0369A1]' : 'bg-[#C2410C]'
-                      }`} />
-                      {att.status}
-                    </span>
+                    <StatusBadge status={att.status} size="sm" />
                   </td>
                   <td className="py-3 px-3 font-medium text-[#172A21]">
                     {att.project}
