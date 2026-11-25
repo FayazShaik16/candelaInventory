@@ -162,11 +162,34 @@ export function LandingPageView({ onNavigate, onRequestResource }: LandingPageVi
     chambersInUse, chambersAvailable, chambersMaintenance, chambersTotal
   ]);
 
-  // Max value calculation for Bar Chart Y-axis
-  const maxBarValue = useMemo(() => {
-    const highest = Math.max(lanforgesTotal, realDevicesTotal, attenuatorsTotal, chambersTotal, 80);
-    return Math.ceil(highest / 20) * 20; // Round up to nearest 20 (e.g. 100)
-  }, [lanforgesTotal, realDevicesTotal, attenuatorsTotal, chambersTotal]);
+  // Adaptive Y-axis scale calculation for both Bar Charts
+  const { yAxisMax4, yAxisTicks4, yAxisMax5, yAxisTicks5 } = useMemo(() => {
+    const maxCount = Math.max(
+      4,
+      ...fleetData.flatMap((f) => [f.inUse, f.available, f.maintenance])
+    );
+
+    const calcScale = (intervals: number) => {
+      const rawStep = Math.ceil((maxCount * 1.12) / intervals);
+      const step =
+        rawStep <= 6
+          ? Math.max(1, rawStep)
+          : rawStep <= 25
+            ? Math.ceil(rawStep / 5) * 5
+            : Math.ceil(rawStep / 10) * 10;
+      const ticks = Array.from({ length: intervals + 1 }, (_, i) => i * step);
+      return { max: step * intervals, ticks };
+    };
+
+    const s4 = calcScale(4);
+    const s5 = calcScale(5);
+    return {
+      yAxisMax4: s4.max,
+      yAxisTicks4: s4.ticks,
+      yAxisMax5: s5.max,
+      yAxisTicks5: s5.ticks,
+    };
+  }, [fleetData]);
 
   // Status colors palette
   const statusColors = {
@@ -653,8 +676,8 @@ export function LandingPageView({ onNavigate, onRequestResource }: LandingPageVi
                       </defs>
 
                       {/* Y-Axis Horizontal Gridlines & Tick Labels */}
-                      {[0, 25, 50, 75, 100].map((val) => {
-                        const y = 220 - (val / 100) * 185;
+                      {yAxisTicks4.map((val) => {
+                        const y = 220 - (val / yAxisMax4) * 185;
                         return (
                           <g key={val}>
                             <line
@@ -720,7 +743,7 @@ export function LandingPageView({ onNavigate, onRequestResource }: LandingPageVi
                           <g key={item.id}>
                             {/* Bars */}
                             {bars.map((bar) => {
-                              const barHeight = Math.max(3, (bar.count / 100) * 185);
+                              const barHeight = bar.count > 0 ? Math.max(4, (bar.count / yAxisMax4) * 185) : 2;
                               const barY = 220 - barHeight;
                               const isDimmed = statusFilter !== 'all' && statusFilter !== bar.status;
                               const isHovered = hoveredBar?.group === item.label && hoveredBar?.status === bar.status;
@@ -1021,8 +1044,8 @@ export function LandingPageView({ onNavigate, onRequestResource }: LandingPageVi
                     </defs>
 
                     {/* Y-Axis Lines */}
-                    {[0, 20, 40, 60, 80, 100].map((val) => {
-                      const y = 240 - (val / 100) * 200;
+                    {yAxisTicks5.map((val) => {
+                      const y = 240 - (val / yAxisMax5) * 200;
                       return (
                         <g key={val}>
                           <line
@@ -1067,7 +1090,7 @@ export function LandingPageView({ onNavigate, onRequestResource }: LandingPageVi
                       return (
                         <g key={item.id}>
                           {bars.map((bar) => {
-                            const barHeight = Math.max(4, (bar.count / 100) * 200);
+                            const barHeight = bar.count > 0 ? Math.max(4, (bar.count / yAxisMax5) * 200) : 2;
                             const barY = 240 - barHeight;
                             const isDimmed = statusFilter !== 'all' && statusFilter !== bar.status;
 
