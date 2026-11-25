@@ -70,3 +70,23 @@ export function StatusBadge({ status, size = 'sm', showLabel = false }: StatusBa
     </span>
   );
 }
+
+export function StatusLegend() {
+  return (
+    <div className="px-4 py-2 bg-[#F9FAF9] border-b border-[#E5EBE6] flex flex-wrap items-center justify-end gap-4 text-[11px] font-medium text-[#64748B]">
+      <span className="text-[10px] uppercase tracking-wider font-semibold text-[#94A3B8]">Status Legend:</span>
+      <span className="inline-flex items-center gap-1.5 text-[#172A21]">
+        <span className="w-2.5 h-2.5 rounded-full bg-[#16A34A] ring-2 ring-[#DCFCE7]" />
+        <span>Available</span>
+      </span>
+      <span className="inline-flex items-center gap-1.5 text-[#172A21]">
+        <span className="w-2.5 h-2.5 rounded-full bg-[#0284C7] ring-2 ring-[#E0F2FE]" />
+        <span>In-Use</span>
+      </span>
+      <span className="inline-flex items-center gap-1.5 text-[#172A21]">
+        <span className="w-2.5 h-2.5 rounded-full bg-[#DC2626] ring-2 ring-[#FEE2E2]" />
+        <span>Under Maintenance</span>
+      </span>
+    </div>
+  );
+}

@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { StatusBadge } from '../inventory/shared/StatusBadge';
+import { StatusBadge, StatusLegend } from '../inventory/shared/StatusBadge';
 import { 
   Sliders, 
   Search, 
@@ -381,6 +381,7 @@ export function AttenuatorsView({ onRequestResource }: AttenuatorsViewProps) {
 
       {/* Table */}
       <div className="bg-white rounded-xl border border-[#E5EBE6] overflow-hidden shadow-sm">
+        <StatusLegend />
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead className="bg-[#F9FAF9] border-b border-[#E5EBE6] text-[#64748B] font-semibold uppercase text-[10.5px]">

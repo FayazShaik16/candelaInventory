@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { MobileItem, GlobalInventoryStatus } from '@/types/inventory';
-import { StatusBadge } from '../shared/StatusBadge';
+import { StatusBadge, StatusLegend } from '../shared/StatusBadge';
 import { 
   Search, 
   ChevronDown, 
@@ -193,6 +193,7 @@ export function MobileTable({
       </div>
 
       {/* Table */}
+      <StatusLegend />
       <div className="overflow-x-auto min-h-[300px]">
         <table className="w-full text-left border-collapse text-xs">
           <thead>

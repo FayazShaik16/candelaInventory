@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import { LANforgeItem, GlobalInventoryStatus, LANforgeLocation } from '@/types/inventory';
 import { useDropdowns } from '@/context/DropdownContext';
-import { StatusBadge } from '../shared/StatusBadge';
+import { StatusBadge, StatusLegend } from '../shared/StatusBadge';
 import { 
   Search, 
   ChevronDown, 
@@ -339,6 +339,7 @@ export function LANforgeTable({
       </div>
 
       {/* Main Table */}
+      <StatusLegend />
       <div className="overflow-x-auto min-h-[340px]">
         <table className="w-full text-left border-collapse text-xs">
           <thead>
