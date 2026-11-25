@@ -53,7 +53,7 @@ export function LandingPageView({ onNavigate, onRequestResource }: LandingPageVi
   } | null>(null);
 
   // =========================================================================
-  // HARDWARE TELEMETRY DATA (LANforges, Real Devices, Attenuators)
+  // HARDWARE TELEMETRY DATA (LANforges, Real Devices, Attenuators, Chambers)
   // =========================================================================
 
   // 1. LANforges Distribution
@@ -82,11 +82,17 @@ export function LandingPageView({ onNavigate, onRequestResource }: LandingPageVi
   const attenuatorsMaintenance = INITIAL_ATTENUATORS.filter((a) => a.status === 'Under Maintenance').length;
   const attenuatorsTotal = INITIAL_ATTENUATORS.length;
 
-  // Aggregate totals across the 3 requested categories
-  const grandTotal = lanforgesTotal + realDevicesTotal + attenuatorsTotal;
-  const grandInUse = lanforgesInUse + realDevicesInUse + attenuatorsInUse;
-  const grandAvailable = lanforgesAvailable + realDevicesAvailable + attenuatorsAvailable;
-  const grandMaintenance = lanforgesMaintenance + realDevicesMaintenance + attenuatorsMaintenance;
+  // 4. Chambers Distribution (RF Isolation Enclosures)
+  const chambersInUse = chambers.filter((c) => c.status === 'In-Use' && !c.isArchived).length;
+  const chambersAvailable = chambers.filter((c) => c.status === 'Available' && !c.isArchived).length;
+  const chambersMaintenance = chambers.filter((c) => c.status === 'Under Maintenance' && !c.isArchived).length;
+  const chambersTotal = chambers.filter((c) => !c.isArchived).length;
+
+  // Aggregate totals across all 4 hardware categories
+  const grandTotal = lanforgesTotal + realDevicesTotal + attenuatorsTotal + chambersTotal;
+  const grandInUse = lanforgesInUse + realDevicesInUse + attenuatorsInUse + chambersInUse;
+  const grandAvailable = lanforgesAvailable + realDevicesAvailable + attenuatorsAvailable + chambersAvailable;
+  const grandMaintenance = lanforgesMaintenance + realDevicesMaintenance + attenuatorsMaintenance + chambersMaintenance;
   const overallUtilizationPct = grandTotal > 0 ? Math.round((grandInUse / grandTotal) * 100) : 0;
 
   const scrollToViewport2 = () => {
@@ -112,7 +118,7 @@ export function LandingPageView({ onNavigate, onRequestResource }: LandingPageVi
       available: lanforgesAvailable,
       maintenance: lanforgesMaintenance,
       total: lanforgesTotal,
-      utilization: Math.round((lanforgesInUse / lanforgesTotal) * 100)
+      utilization: lanforgesTotal > 0 ? Math.round((lanforgesInUse / lanforgesTotal) * 100) : 0
     },
     {
       id: 'real_devices',
@@ -136,19 +142,32 @@ export function LandingPageView({ onNavigate, onRequestResource }: LandingPageVi
       available: attenuatorsAvailable,
       maintenance: attenuatorsMaintenance,
       total: attenuatorsTotal,
-      utilization: Math.round((attenuatorsInUse / attenuatorsTotal) * 100)
+      utilization: attenuatorsTotal > 0 ? Math.round((attenuatorsInUse / attenuatorsTotal) * 100) : 0
+    },
+    {
+      id: 'chambers',
+      label: 'Chambers',
+      subtitle: 'RF Isolation Enclosures',
+      icon: Box,
+      navKey: 'chambers' as NavItemKey,
+      inUse: chambersInUse,
+      available: chambersAvailable,
+      maintenance: chambersMaintenance,
+      total: chambersTotal,
+      utilization: chambersTotal > 0 ? Math.round((chambersInUse / chambersTotal) * 100) : 0
     }
   ], [
     lanforgesInUse, lanforgesAvailable, lanforgesMaintenance, lanforgesTotal,
     realDevicesInUse, realDevicesAvailable, realDevicesMaintenance, realDevicesTotal,
-    attenuatorsInUse, attenuatorsAvailable, attenuatorsMaintenance, attenuatorsTotal
+    attenuatorsInUse, attenuatorsAvailable, attenuatorsMaintenance, attenuatorsTotal,
+    chambersInUse, chambersAvailable, chambersMaintenance, chambersTotal
   ]);
 
   // Max value calculation for Bar Chart Y-axis
   const maxBarValue = useMemo(() => {
-    const highest = Math.max(lanforgesTotal, realDevicesTotal, attenuatorsTotal, 80);
+    const highest = Math.max(lanforgesTotal, realDevicesTotal, attenuatorsTotal, chambersTotal, 80);
     return Math.ceil(highest / 20) * 20; // Round up to nearest 20 (e.g. 100)
-  }, [lanforgesTotal, realDevicesTotal, attenuatorsTotal]);
+  }, [lanforgesTotal, realDevicesTotal, attenuatorsTotal, chambersTotal]);
 
   // Status colors palette
   const statusColors = {
@@ -483,7 +502,7 @@ export function LandingPageView({ onNavigate, onRequestResource }: LandingPageVi
               Hardware Fleet Operational Breakdown
             </h2>
             <p className="text-xs text-[#64748B] mt-0.5">
-              Comparative visual analytics for <strong className="text-[#172A21]">LANforges</strong>, <strong className="text-[#172A21]">Real Devices</strong>, and <strong className="text-[#172A21]">Attenuators</strong> across operational statuses.
+              Comparative visual analytics for <strong className="text-[#172A21]">LANforges</strong>, <strong className="text-[#172A21]">Real Devices</strong>, <strong className="text-[#172A21]">Attenuators</strong>, and <strong className="text-[#172A21]">Chambers</strong> across operational statuses.
             </p>
           </div>
 
@@ -665,12 +684,12 @@ export function LandingPageView({ onNavigate, onRequestResource }: LandingPageVi
                       {/* X-Axis Baseline */}
                       <line x1="45" y1="220" x2="660" y2="220" stroke="#CBD5E1" strokeWidth="1.5" />
 
-                      {/* 3 Equipment Clusters on X-Axis */}
+                      {/* 4 Equipment Clusters on X-Axis */}
                       {fleetData.map((item, idx) => {
-                        const centerX = 160 + idx * 195;
-                        const barWidth = 32;
-                        const gap = 8;
-                        const groupWidth = 3 * barWidth + 2 * gap; // 112px
+                        const centerX = 125 + idx * 150;
+                        const barWidth = 26;
+                        const gap = 6;
+                        const groupWidth = 3 * barWidth + 2 * gap; // 90px
                         const startX = centerX - groupWidth / 2;
 
                         // Bar coordinates
@@ -807,9 +826,9 @@ export function LandingPageView({ onNavigate, onRequestResource }: LandingPageVi
                 </div>
 
                 {/* Bottom Quick Navigation Links */}
-                <div className="pt-3 border-t border-[#F1F5F2] flex items-center justify-between text-xs text-[#64748B]">
+                <div className="pt-3 border-t border-[#F1F5F2] flex flex-wrap items-center justify-between gap-2 text-xs text-[#64748B]">
                   <span>Click category name to view inventory</span>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5 flex-wrap">
                     {fleetData.map((f) => (
                       <button
                         key={f.id}
@@ -838,14 +857,14 @@ export function LandingPageView({ onNavigate, onRequestResource }: LandingPageVi
                     </span>
                   </div>
 
-                  {/* 3 Donut Gauges in a Vertical Stack */}
+                  {/* 4 Donut Gauges in a Vertical Stack */}
                   <div className="divide-y divide-[#F1F5F2] pt-1">
                     {fleetData.map((item) => {
                       const Icon = item.icon;
                       const circumference = 2 * Math.PI * 40; // radius = 40, ~251.3
-                      const inUseLength = (item.inUse / item.total) * circumference;
-                      const availLength = (item.available / item.total) * circumference;
-                      const maintLength = (item.maintenance / item.total) * circumference;
+                      const inUseLength = item.total > 0 ? (item.inUse / item.total) * circumference : 0;
+                      const availLength = item.total > 0 ? (item.available / item.total) * circumference : 0;
+                      const maintLength = item.total > 0 ? (item.maintenance / item.total) * circumference : 0;
 
                       const offsetInUse = 0;
                       const offsetAvail = -inUseLength;
@@ -1032,12 +1051,12 @@ export function LandingPageView({ onNavigate, onRequestResource }: LandingPageVi
 
                     <line x1="50" y1="240" x2="880" y2="240" stroke="#CBD5E1" strokeWidth="1.5" />
 
-                    {/* 3 Clusters */}
+                    {/* 4 Clusters */}
                     {fleetData.map((item, idx) => {
-                      const centerX = 200 + idx * 260;
-                      const barWidth = 44;
-                      const gap = 12;
-                      const groupWidth = 3 * barWidth + 2 * gap; // 156px
+                      const centerX = 160 + idx * 205;
+                      const barWidth = 36;
+                      const gap = 10;
+                      const groupWidth = 3 * barWidth + 2 * gap; // 128px
                       const startX = centerX - groupWidth / 2;
 
                       const bars = [
@@ -1122,7 +1141,7 @@ export function LandingPageView({ onNavigate, onRequestResource }: LandingPageVi
               </div>
 
               {/* Bottom Quick Jump Cards */}
-              <div className="pt-4 border-t border-[#F1F5F2] grid grid-cols-3 gap-4">
+              <div className="pt-4 border-t border-[#F1F5F2] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {fleetData.map((f) => (
                   <button
                     key={f.id}
@@ -1141,15 +1160,15 @@ export function LandingPageView({ onNavigate, onRequestResource }: LandingPageVi
             </div>
           )}
 
-          {/* VIEW MODE 3: 3 PROMINENT RADIAL DONUT GAUGES */}
+          {/* VIEW MODE 3: 4 PROMINENT RADIAL DONUT GAUGES */}
           {chartView === 'donuts' && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5 h-full">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 h-full">
               {fleetData.map((item) => {
                 const Icon = item.icon;
                 const circumference = 2 * Math.PI * 52; // radius = 52, ~326.7
-                const inUseLength = (item.inUse / item.total) * circumference;
-                const availLength = (item.available / item.total) * circumference;
-                const maintLength = (item.maintenance / item.total) * circumference;
+                const inUseLength = item.total > 0 ? (item.inUse / item.total) * circumference : 0;
+                const availLength = item.total > 0 ? (item.available / item.total) * circumference : 0;
+                const maintLength = item.total > 0 ? (item.maintenance / item.total) * circumference : 0;
 
                 const offsetInUse = 0;
                 const offsetAvail = -inUseLength;
@@ -1241,19 +1260,19 @@ export function LandingPageView({ onNavigate, onRequestResource }: LandingPageVi
                         <div className="p-2 rounded-xl bg-[#DCFCE7]/60 border border-[#BBF7D0] text-center">
                           <div className="text-[10px] font-semibold text-[#15803D]">In-Use</div>
                           <div className="text-base font-bold font-mono text-[#15803D] mt-0.5">{item.inUse}</div>
-                          <div className="text-[10px] text-[#166534]">{Math.round((item.inUse / item.total) * 100)}%</div>
+                          <div className="text-[10px] text-[#166534]">{item.total > 0 ? Math.round((item.inUse / item.total) * 100) : 0}%</div>
                         </div>
 
                         <div className="p-2 rounded-xl bg-[#E0F2FE]/60 border border-[#BAE6FD] text-center">
                           <div className="text-[10px] font-semibold text-[#0369A1]">Available</div>
                           <div className="text-base font-bold font-mono text-[#0369A1] mt-0.5">{item.available}</div>
-                          <div className="text-[10px] text-[#075985]">{Math.round((item.available / item.total) * 100)}%</div>
+                          <div className="text-[10px] text-[#075985]">{item.total > 0 ? Math.round((item.available / item.total) * 100) : 0}%</div>
                         </div>
 
                         <div className="p-2 rounded-xl bg-[#FFEDD5]/60 border border-[#FED7AA] text-center">
                           <div className="text-[10px] font-semibold text-[#C2410C]">Maintenance</div>
                           <div className="text-base font-bold font-mono text-[#C2410C] mt-0.5">{item.maintenance}</div>
-                          <div className="text-[10px] text-[#9A3412]">{Math.round((item.maintenance / item.total) * 100)}%</div>
+                          <div className="text-[10px] text-[#9A3412]">{item.total > 0 ? Math.round((item.maintenance / item.total) * 100) : 0}%</div>
                         </div>
                       </div>
                     </div>
