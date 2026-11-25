@@ -17,7 +17,6 @@ import {
   Layers, 
   Send,
   Calendar,
-  Sparkles,
   TrendingUp,
   ShieldCheck,
   Activity,
@@ -1293,34 +1292,6 @@ export function LandingPageView({ onNavigate, onRequestResource }: LandingPageVi
               })}
             </div>
           )}
-        </div>
-
-        {/* Global Executive Status Bar at Bottom of Viewport 2 */}
-        <div className="p-3.5 bg-white rounded-2xl border border-[#E5EBE6] flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-[#EBF4EF] text-[#247A51] rounded-xl">
-              <Sparkles className="w-4 h-4" />
-            </div>
-            <div>
-              <div className="text-xs font-bold text-[#172A21]">Candela Mission-Critical Telemetry Stream</div>
-              <div className="text-[11px] text-[#64748B]">
-                Hardware allocations across LANforges, Real Devices & Attenuators are synced live with active lab testbeds.
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 self-end sm:self-auto">
-            {!isAdmin && onRequestResource && (
-              <button
-                type="button"
-                onClick={onRequestResource}
-                className="px-3.5 py-1.5 text-xs font-semibold text-white bg-[#247A51] hover:bg-[#1D6342] rounded-xl transition-colors shadow-sm inline-flex items-center gap-1.5"
-              >
-                <Send className="w-3.5 h-3.5" />
-                <span>Request Equipment Allocation</span>
-              </button>
-            )}
-          </div>
         </div>
       </section>
     </div>
