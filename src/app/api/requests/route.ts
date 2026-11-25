@@ -14,9 +14,15 @@ export async function GET() {
       .select('*')
       .order('created_at', { ascending: false });
 
-    if (error || !data || data.length === 0) {
-      // Fallback to initial requests if table is not yet migrated in Supabase
-      return NextResponse.json({ requests: INITIAL_REQUESTS });
+    if (error) {
+      return NextResponse.json(
+        { requests: [], error: error.message, code: error.code },
+        { status: error.code === 'PGRST205' ? 503 : 500 }
+      );
+    }
+
+    if (!data || data.length === 0) {
+      return NextResponse.json({ requests: [] });
     }
 
     // Map database snake_case to frontend camelCase
@@ -60,31 +66,36 @@ export async function POST(req: NextRequest) {
 
     if (supabase) {
       if (action === 'create' && request) {
-        // Try insert into Supabase if table exists
-        try {
-          await supabase.from('inventory_requests').insert({
-            id: request.id,
-            employee_id: request.employeeId,
-            employee_name: request.employeeName,
-            employee_email: request.employeeEmail,
-            resource_category: request.resourceCategory,
-            resource_label: request.resourceLabel,
-            target_specs: request.targetSpecs || null,
-            preferred_asset_id: request.preferredAssetId || null,
-            preferred_asset_tag: request.preferredAssetTag || null,
-            project: request.project,
-            purpose: request.purpose,
-            priority: request.priority || 'Standard',
-            duration: request.duration || '2 Weeks',
-            status: 'pending',
-            admin_notes: request.adminNotes || null,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          });
-        } catch {}
+        const { error } = await supabase.from('inventory_requests').insert({
+          id: request.id,
+          employee_id: request.employeeId,
+          employee_name: request.employeeName,
+          employee_email: request.employeeEmail,
+          resource_category: request.resourceCategory,
+          resource_label: request.resourceLabel,
+          target_specs: request.targetSpecs || null,
+          preferred_asset_id: request.preferredAssetId || null,
+          preferred_asset_tag: request.preferredAssetTag || null,
+          project: request.project,
+          purpose: request.purpose,
+          priority: request.priority || 'Standard',
+          duration: request.duration || '2 Weeks',
+          status: 'pending',
+          admin_notes: request.adminNotes || null,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        });
+
+        if (error) {
+          return NextResponse.json(
+            { success: false, error: error.message, code: error.code },
+            { status: error.code === 'PGRST205' ? 503 : 500 }
+          );
+        }
       } else if (action === 'updateStatus' && requestId) {
-        try {
-          await supabase.from('inventory_requests').update({
+        const { error } = await supabase
+          .from('inventory_requests')
+          .update({
             status,
             admin_notes: adminNotes || null,
             assigned_asset_id: assignedAssetId || null,
@@ -93,8 +104,15 @@ export async function POST(req: NextRequest) {
             reviewed_by: reviewedBy || null,
             reviewed_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
-          }).eq('id', requestId);
-        } catch {}
+          })
+          .eq('id', requestId);
+
+        if (error) {
+          return NextResponse.json(
+            { success: false, error: error.message, code: error.code },
+            { status: error.code === 'PGRST205' ? 503 : 500 }
+          );
+        }
       }
     }
 

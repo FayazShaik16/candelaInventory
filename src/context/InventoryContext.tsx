@@ -1083,14 +1083,21 @@ export function InventoryProvider({ children }: { children: React.ReactNode }) {
         },
       });
 
-      // Background persistence
-      try {
-        await fetch('/api/requests', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'create', request: newReq }),
-        });
-      } catch { }
+      // Persist to backend database
+      const apiRes = await fetch('/api/requests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'create', request: newReq }),
+      });
+      const apiData = await apiRes.json();
+      if (!apiRes.ok || !apiData.success) {
+        // Revert optimistic local state if DB persistence failed
+        saveRequests(requests);
+        return {
+          success: false,
+          error: apiData.error || 'Failed to persist request to database. Ensure inventory_requests table exists.',
+        };
+      }
 
       return { success: true, request: newReq };
     } catch (err: any) {
